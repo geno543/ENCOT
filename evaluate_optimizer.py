@@ -1,5 +1,4 @@
 import sys
-sys.path.insert(0, '/home/saketh/ecoli/codon_env/lib/python3.11/site-packages')
 """
 Enhanced Evaluation Script for CodonTransformer
 -----------------------------------------------
@@ -46,10 +45,10 @@ from CodonTransformer.CodonEvaluation import (
     calculate_SCUO,
 )
 from CodonTransformer.CodonPostProcessing import (
-    enhanced_sequence_generation,
     polish_sequence_with_dnachisel,
-    apply_pareto_filtering,
-    calculate_sequence_metrics,
+    # enhanced_sequence_generation,  # Not available
+    # apply_pareto_filtering,  # Not available
+    # calculate_sequence_metrics,  # Not available
 )
 from CodonTransformer.CodonUtils import DNASequencePrediction
 
