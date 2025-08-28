@@ -73,15 +73,96 @@ def find_longest_orf(dna_sequence: str) -> str:
     return longest_orf
 
 
-def parse_excel_sequences(excel_path: str) -> List[Dict[str, str]]:
-    """Parse sequences from the benchmark Excel file."""
-    df = pd.read_excel(excel_path)
+def _detect_columns(df: pd.DataFrame, name_hint: str | None = None, seq_hint: str | None = None) -> tuple[str | None, str]:
+    """Detect name and sequence columns in a case-insensitive, robust way.
+
+    Returns (name_col_or_None, seq_col). Raises ValueError if no sequence-like column
+    can be found.
+    """
+    cols = list(df.columns)
+    low_map = {c.lower().strip(): c for c in cols}
+
+    # If hints are provided and exist (case-insensitive), honor them
+    if name_hint:
+        nh = name_hint.lower().strip()
+        if nh in low_map:
+            name_col = low_map[nh]
+        else:
+            name_col = None
+    else:
+        name_col = None
+
+    if seq_hint:
+        sh = seq_hint.lower().strip()
+        if sh in low_map:
+            seq_col = low_map[sh]
+        else:
+            seq_col = None
+    else:
+        seq_col = None
+
+    # If not found, try candidates
+    if name_col is None:
+        name_candidates = [
+            'name','id','title','gene','protein','description','label','accession','locus','entry','uniprot','ncbi','protein name'
+        ]
+        for k in name_candidates:
+            if k in low_map:
+                name_col = low_map[k]
+                break
+
+    if seq_col is None:
+        seq_candidates = [
+            # protein-first
+            'protein sequence','protein_sequence','protein','aa sequence','aa_sequence','aa','amino acid sequence','amino_acid_sequence',
+            # generic
+            'sequence','seq',
+            # dna/cds
+            'cds','dna','coding sequence','coding_sequence','cds sequence','cds_sequence'
+        ]
+        for k in seq_candidates:
+            if k in low_map:
+                seq_col = low_map[k]
+                break
+
+    if not seq_col:
+        raise ValueError(f"Could not detect sequence column. Available columns: {cols}")
+
+    return name_col, seq_col
+
+
+def parse_excel_sequences(excel_path: str, name_col: str | None = None, seq_col: str | None = None, sheet_name: str | int | None = None) -> List[Dict[str, str]]:
+    """Parse sequences from the benchmark Excel file, auto-detecting column names.
+
+    - name_col/seq_col are optional overrides (case-insensitive).
+    - If detection fails for sequence, raises a clear error listing available columns.
+    """
+    # Normalize sheet_name: default to first sheet (0). If passed as a digit string, cast to int.
+    sn = sheet_name
+    if isinstance(sn, str) and sn.isdigit():
+        sn = int(sn)
+    if sn is None:
+        sn = 0
+
+    df_or_dict = pd.read_excel(excel_path, sheet_name=sn)
+    if isinstance(df_or_dict, dict):
+        # If a dict was returned (older pandas or explicit None), pick the first sheet
+        first_title, df = next(iter(df_or_dict.items()))
+        print(f"Using sheet: {first_title}")
+    else:
+        df = df_or_dict
     sequences = []
-    
+
+    detected_name_col, detected_seq_col = _detect_columns(df, name_col, seq_col)
+    print(f"Detected columns -> name: {detected_name_col or '[generated]'}, sequence: {detected_seq_col}")
+
     for idx, row in df.iterrows():
-        # Extract sequence from the Sequence column
-        sequence = str(row['Sequence']).strip()
-        name = str(row['Name']).strip()
+        # Extract from detected columns
+        sequence = str(row[detected_seq_col]).strip()
+        if detected_name_col:
+            name = str(row[detected_name_col]).strip()
+        else:
+            name = f"seq_{idx}"
         
         # Remove any '>' characters from name
         if name.startswith('>'):
@@ -484,6 +565,9 @@ def main():
     parser.add_argument("--output_dir", type=str, default="benchmark_results",
                         help="Directory to save results")
     parser.add_argument("--use_gpu", action="store_true", help="Use GPU if available")
+    parser.add_argument("--name_col", type=str, default=None, help="Optional: column name for sequence label (case-insensitive)")
+    parser.add_argument("--seq_col", type=str, default=None, help="Optional: column name for sequence (case-insensitive)")
+    parser.add_argument("--sheet_name", type=str, default=None, help="Optional: Excel sheet name or index")
     
     args = parser.parse_args()
     
@@ -502,7 +586,12 @@ def main():
     
     # Load sequences from Excel
     print(f"\nLoading sequences from {args.excel_path}...")
-    sequences = parse_excel_sequences(args.excel_path)
+    sequences = parse_excel_sequences(
+        args.excel_path,
+        name_col=args.name_col,
+        seq_col=args.seq_col,
+        sheet_name=args.sheet_name,
+    )
     print(f"Loaded {len(sequences)} sequences")
     
     # Load model
@@ -558,6 +647,23 @@ def main():
     results_path = os.path.join(output_dir, 'optimization_results.csv')
     results_df.to_csv(results_path, index=False)
     print(f"\nRaw results saved to {results_path}")
+    
+    # Save optimized DNA sequences to a separate CSV
+    optimized_sequences = results_df[['id', 'name', 'protein_sequence', 'optimized_dna']].copy()
+    optimized_sequences['protein_length'] = results_df['protein_length']
+    optimized_sequences['dna_length'] = optimized_sequences['optimized_dna'].apply(len)
+    optimized_sequences['optimized_cai'] = results_df['optimized_cai']
+    optimized_sequences['optimized_gc'] = results_df['optimized_gc']
+    optimized_sequences['optimized_tai'] = results_df['optimized_tai']
+    
+    # If original sequences exist, add improvement metrics
+    if 'original_cai' in results_df.columns:
+        optimized_sequences['original_cai'] = results_df['original_cai']
+        optimized_sequences['cai_improvement'] = ((results_df['optimized_cai'] - results_df['original_cai']) / results_df['original_cai'] * 100).round(2)
+    
+    optimized_sequences_path = os.path.join(output_dir, 'optimized_dna_sequences.csv')
+    optimized_sequences.to_csv(optimized_sequences_path, index=False)
+    print(f"Optimized DNA sequences saved to {optimized_sequences_path}")
     
     # Generate visualizations and summary
     print("\n" + "="*60)
