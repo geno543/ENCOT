@@ -1,9 +1,8 @@
 """
-Pretrain the CodonTransformer model.
-
-The dataset is a JSON file. You can use prepare_training_data from CodonData to
-prepare the dataset. The repository README has a guide on how to prepare the
-dataset and use this script.
+File: pretrain.py
+-----------------
+Pretrain the CodonTransformer model on JSON datasets prepared via
+CodonData.prepare_training_data. See README for setup and usage.
 """
 
 import argparse

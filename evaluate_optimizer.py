@@ -1,12 +1,12 @@
 import sys
 """
-Enhanced Evaluation Script for CodonTransformer
------------------------------------------------
-This script evaluates the CodonTransformer model with enhanced capabilities:
-1. DNAChisel post-processing for sequence polishing
-2. Pareto frontier filtering for multi-objective optimization
-3. Enhanced beam search with multiple candidates
-4. Comprehensive metrics calculation and ablation studies
+File: evaluate_optimizer.py
+---------------------------
+Evaluate the CodonTransformer model with enhanced capabilities:
+1) DNAChisel post-processing for sequence polishing
+2) Optional multi-objective generation (Pareto-style filtering)
+3) Enhanced beam search with multiple candidates
+4) Comprehensive metrics and optional ablation studies
 """
 
 import argparse

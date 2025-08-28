@@ -1,3 +1,11 @@
+"""
+File: benchmark_evaluation.py
+------------------------------
+Benchmark E. coli protein sequences with ColiFormer, generate optimized DNA,
+compute metrics (CAI, tAI, GC, CFD, cis-elements), and produce summary tables
+and figures.
+"""
+
 import sys
 import os
 import argparse
@@ -34,7 +42,15 @@ from evaluate_optimizer import translate_dna_to_protein
 
 
 def find_longest_orf(dna_sequence: str) -> str:
-    """Find the longest open reading frame in a DNA sequence."""
+    """
+    Find the longest open reading frame (ORF) in a DNA sequence.
+
+    Args:
+        dna_sequence (str): Input DNA sequence (ATCGN characters).
+
+    Returns:
+        str: Longest ORF (from start to stop codon), or empty string if none.
+    """
     dna_sequence = dna_sequence.upper()
     start_codons = ['ATG']
     stop_codons = ['TAA', 'TAG', 'TGA']
@@ -68,10 +84,19 @@ def find_longest_orf(dna_sequence: str) -> str:
 
 
 def _detect_columns(df: pd.DataFrame, name_hint: str | None = None, seq_hint: str | None = None) -> tuple[str | None, str]:
-    """Detect name and sequence columns in a case-insensitive, robust way.
+    """
+    Detect name and sequence columns in a case-insensitive, robust way.
 
-    Returns (name_col_or_None, seq_col). Raises ValueError if no sequence-like column
-    can be found.
+    Args:
+        df (pd.DataFrame): Input DataFrame read from Excel.
+        name_hint (str | None): Optional override for name/label column (case-insensitive).
+        seq_hint (str | None): Optional override for sequence column (case-insensitive).
+
+    Returns:
+        tuple[str | None, str]: Detected (name_column or None, sequence_column).
+
+    Raises:
+        ValueError: If a sequence-like column cannot be found.
     """
     cols = list(df.columns)
     low_map = {c.lower().strip(): c for c in cols}
@@ -126,10 +151,21 @@ def _detect_columns(df: pd.DataFrame, name_hint: str | None = None, seq_hint: st
 
 
 def parse_excel_sequences(excel_path: str, name_col: str | None = None, seq_col: str | None = None, sheet_name: str | int | None = None) -> List[Dict[str, str]]:
-    """Parse sequences from the benchmark Excel file, auto-detecting column names.
+    """
+    Parse sequences from the benchmark Excel file and auto-detect relevant columns.
 
-    - name_col/seq_col are optional overrides (case-insensitive).
-    - If detection fails for sequence, raises a clear error listing available columns.
+    Args:
+        excel_path (str): Path to the Excel file.
+        name_col (str | None): Optional override for sequence name column.
+        seq_col (str | None): Optional override for sequence column.
+        sheet_name (str | int | None): Sheet name or index (default: first sheet).
+
+    Returns:
+        List[Dict[str, str]]: List of standardized sequence records with fields:
+            id, name, protein_sequence, original_sequence (DNA or None), is_dna.
+
+    Raises:
+        ValueError: If a sequence column cannot be detected.
     """
     sn = sheet_name
     if isinstance(sn, str) and sn.isdigit():
@@ -205,7 +241,17 @@ def parse_excel_sequences(excel_path: str, name_col: str | None = None, seq_col:
 
 
 def calculate_cfd(dna_sequence: str, codon_frequencies: Dict) -> float:
-    """Calculate Codon Frequency Distribution similarity."""
+    """
+    Calculate Codon Frequency Distribution (CFD) similarity to a reference.
+
+    Args:
+        dna_sequence (str): Input DNA sequence.
+        codon_frequencies (Dict): Reference frequencies; accepts flattened mapping
+            or an amino2codon structure (will be flattened).
+
+    Returns:
+        float: Similarity score in [0, 1] where higher is more similar.
+    """
     if not dna_sequence:
         return 0.0
 
@@ -257,7 +303,23 @@ def run_model_on_sequences(
     reference_profile: List[float],
     output_dir: str
 ) -> pd.DataFrame:
-    """Run ColiFormer model on sequences and calculate metrics."""
+    """
+    Run ColiFormer on protein sequences and compute metrics for optimized DNA.
+
+    Args:
+        sequences (List[Dict]): Parsed sequence records.
+        model: Loaded ColiFormer model.
+        tokenizer: Tokenizer used by the model.
+        device: Torch device.
+        cai_weights (Dict): CAI weights.
+        tai_weights (Dict): tAI weights.
+        codon_frequencies (Dict): Reference codon frequencies.
+        reference_profile (List[float]): Reserved for DTW profile (unused here).
+        output_dir (str): Directory for outputs (not written here).
+
+    Returns:
+        pd.DataFrame: Per-sequence metrics and optimized DNA.
+    """
     results = []
     print(f"Processing {len(sequences)} sequences...")
 
@@ -325,7 +387,22 @@ def run_model_on_sequences(
 
 
 def generate_visualizations(results_df: pd.DataFrame, output_dir: str):
-    """Generate all required visualizations."""
+    """
+    Generate visualizations and a metrics summary table.
+
+    Saves:
+        - CAI before/after bar plot
+        - Median CAI comparison
+        - Metrics distribution panel
+        - CSV summary table
+
+    Args:
+        results_df (pd.DataFrame): Results from optimization.
+        output_dir (str): Output directory root.
+
+    Returns:
+        pd.DataFrame: Summary table of aggregate metrics.
+    """
     plt.style.use('seaborn-v0_8-darkgrid')
     sns.set_palette("husl")
 
@@ -501,6 +578,7 @@ def generate_visualizations(results_df: pd.DataFrame, output_dir: str):
 
 
 def main():
+    """CLI entrypoint to run the ColiFormer benchmark workflow."""
     parser = argparse.ArgumentParser(description="Benchmark ColiFormer on E. coli sequences")
     parser.add_argument("--excel_path", type=str, default="Benchmark 80 sequences.xlsx",
                         help="Path to benchmark Excel file")

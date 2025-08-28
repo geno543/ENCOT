@@ -1,8 +1,9 @@
 """
-Finetune the CodonTransformer model.
-
-The pretrained model is loaded from Hugging Face. Prepare data with
-CodonData.prepare_training_data; see README for usage.
+File: finetune.py
+------------------
+Finetune the CodonTransformer model on JSON datasets prepared via
+CodonData.prepare_training_data. The pretrained base is loaded from
+Hugging Face. See README for usage details.
 """
 
 import argparse

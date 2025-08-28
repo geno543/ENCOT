@@ -1,3 +1,10 @@
+"""
+File: app.py
+-------------
+Streamlit GUI for CodonTransformer. Provides sequence validation, optimization,
+and visualization for E. coli-focused workflows with optional post-processing.
+"""
+
 import streamlit as st
 import torch
 import pandas as pd
