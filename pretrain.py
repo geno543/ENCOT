@@ -1,6 +1,4 @@
 """
-File: pretrain.py
--------------------
 Pretrain the CodonTransformer model.
 
 The dataset is a JSON file. You can use prepare_training_data from CodonData to
@@ -50,13 +48,11 @@ class MaskedTokenizerCollator:
         prob_matrix[inputs < 5] = 0.0
         selected = torch.bernoulli(prob_matrix).bool()
 
-        # 80% of the time, replace masked input tokens with respective mask tokens
         replaced = torch.bernoulli(torch.full(selected.shape, 0.8)).bool() & selected
         inputs[replaced] = torch.tensor(
             list((map(TOKEN2MASK.__getitem__, inputs[replaced].numpy())))
         )
 
-        # 10% of the time, we replace masked input tokens with random vector.
         randomized = (
             torch.bernoulli(torch.full(selected.shape, 0.1)).bool()
             & selected
@@ -130,7 +126,6 @@ def main(args):
     pl.seed_everything(args.seed)
     torch.set_float32_matmul_precision("medium")
 
-    # Load the tokenizer and model
     tokenizer = PreTrainedTokenizerFast(
         tokenizer_file=args.tokenizer_path,
         bos_token="[CLS]",
@@ -149,7 +144,6 @@ def main(args):
     model = BigBirdForMaskedLM(config=config)
     harnessed_model = plTrainHarness(model, args.learning_rate, args.warmup_fraction)
 
-    # Load the training data
     train_data = IterableJSONData(args.train_data_path, dist_env="slurm")
     data_loader = DataLoader(
         dataset=train_data,
@@ -159,7 +153,6 @@ def main(args):
         persistent_workers=False if args.debug else True,
     )
 
-    # Setup trainer and callbacks
     save_checkpoint = EpochCheckpoint(args.checkpoint_dir, args.save_interval)
     trainer = pl.Trainer(
         default_root_dir=args.checkpoint_dir,

@@ -29,8 +29,6 @@ from CodonTransformer.CodonEvaluation import (
     count_negative_cis_elements,
 )
 from transformers import AutoTokenizer
-
-# Import translate function from evaluate_optimizer
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from evaluate_optimizer import translate_dna_to_protein
 
@@ -43,7 +41,6 @@ def find_longest_orf(dna_sequence: str) -> str:
     
     longest_orf = ""
     
-    # Check all 3 reading frames
     for frame in range(3):
         current_orf = ""
         in_orf = False
@@ -54,19 +51,16 @@ def find_longest_orf(dna_sequence: str) -> str:
                 break
                 
             if codon in start_codons and not in_orf:
-                # Start of ORF
                 in_orf = True
                 current_orf = codon
             elif in_orf:
                 current_orf += codon
                 if codon in stop_codons:
-                    # End of ORF
                     if len(current_orf) > len(longest_orf):
                         longest_orf = current_orf
                     in_orf = False
                     current_orf = ""
-        
-        # Handle ORF that goes to end of sequence
+
         if in_orf and len(current_orf) > len(longest_orf):
             longest_orf = current_orf
     
@@ -137,7 +131,6 @@ def parse_excel_sequences(excel_path: str, name_col: str | None = None, seq_col:
     - name_col/seq_col are optional overrides (case-insensitive).
     - If detection fails for sequence, raises a clear error listing available columns.
     """
-    # Normalize sheet_name: default to first sheet (0). If passed as a digit string, cast to int.
     sn = sheet_name
     if isinstance(sn, str) and sn.isdigit():
         sn = int(sn)
@@ -146,7 +139,6 @@ def parse_excel_sequences(excel_path: str, name_col: str | None = None, seq_col:
 
     df_or_dict = pd.read_excel(excel_path, sheet_name=sn)
     if isinstance(df_or_dict, dict):
-        # If a dict was returned (older pandas or explicit None), pick the first sheet
         first_title, df = next(iter(df_or_dict.items()))
         print(f"Using sheet: {first_title}")
     else:
@@ -157,61 +149,47 @@ def parse_excel_sequences(excel_path: str, name_col: str | None = None, seq_col:
     print(f"Detected columns -> name: {detected_name_col or '[generated]'}, sequence: {detected_seq_col}")
 
     for idx, row in df.iterrows():
-        # Extract from detected columns
         sequence = str(row[detected_seq_col]).strip()
         if detected_name_col:
             name = str(row[detected_name_col]).strip()
         else:
             name = f"seq_{idx}"
-        
-        # Remove any '>' characters from name
+
         if name.startswith('>'):
             name = name[1:].strip()
-        
-        # Clean sequence - remove any non-alphabetic characters
+
         sequence = ''.join(filter(str.isalpha, sequence))
-        
-        # Check if it's a DNA or protein sequence
-        # More robust detection: if >95% of characters are ATCGN, it's likely DNA
+
         dna_chars = sum(1 for c in sequence.upper() if c in 'ATCGN')
         is_dna = (dna_chars / len(sequence)) > 0.95 if len(sequence) > 0 else False
-        
+
         if is_dna:
-            # For DNA sequences, try to find the longest ORF
             longest_orf = find_longest_orf(sequence)
-            
-            if longest_orf and len(longest_orf) >= 30:  # At least 10 codons
-                # Use the ORF
+
+            if longest_orf and len(longest_orf) >= 30:
                 original_dna = longest_orf
                 protein_seq = translate_dna_to_protein(longest_orf)
             else:
-                # No good ORF found, truncate to nearest multiple of 3
                 truncated_len = (len(sequence) // 3) * 3
-                if truncated_len >= 30:  # At least 10 codons
+                if truncated_len >= 30:
                     original_dna = sequence[:truncated_len]
                     protein_seq = translate_dna_to_protein(original_dna)
                 else:
-                    # Skip sequences that are too short
                     continue
-            
-            # Remove sequences with early stop codons in protein
+
             if '*' in protein_seq:
-                # Truncate at first stop codon
                 stop_pos = protein_seq.find('*')
-                if stop_pos >= 10:  # At least 10 amino acids
+                if stop_pos >= 10:
                     protein_seq = protein_seq[:stop_pos]
                     original_dna = original_dna[:stop_pos*3]
                 else:
-                    continue  # Skip if too short
-            
+                    continue
+
         else:
-            # It's already a protein sequence
             protein_seq = sequence.upper()
-            # Remove any stop codons
             protein_seq = protein_seq.replace('*', '')
             original_dna = None
-        
-        # Skip very short sequences
+
         if len(protein_seq) < 10:
             continue
         
@@ -230,49 +208,41 @@ def calculate_cfd(dna_sequence: str, codon_frequencies: Dict) -> float:
     """Calculate Codon Frequency Distribution similarity."""
     if not dna_sequence:
         return 0.0
-    
-    # Calculate codon frequency distribution for the sequence
+
     codon_count = {}
     total_codons = 0
-    
+
     for i in range(0, len(dna_sequence) - 2, 3):
         codon = dna_sequence[i:i+3].upper()
         if len(codon) == 3:
             codon_count[codon] = codon_count.get(codon, 0) + 1
             total_codons += 1
-    
-    # Convert to frequencies
+
     seq_freq = {}
     if total_codons > 0:
         for codon, count in codon_count.items():
             seq_freq[codon] = count / total_codons
-    
-    # For codon_frequencies dict that has amino2codon structure, we need to extract codon frequencies
-    # First, let's flatten the codon frequencies if it's in amino2codon format
+
+    # Flatten amino2codon frequencies if needed
     flat_codon_freq = {}
     if isinstance(codon_frequencies, dict):
-        # Check if it's amino2codon format
         first_key = next(iter(codon_frequencies.keys()))
         if isinstance(codon_frequencies[first_key], tuple) and len(codon_frequencies[first_key]) == 2:
-            # It's amino2codon format - extract codon frequencies
             for amino, (codons, freqs) in codon_frequencies.items():
                 for codon, freq in zip(codons, freqs):
                     flat_codon_freq[codon] = freq
         else:
-            # Already flat format
             flat_codon_freq = codon_frequencies
-    
-    # Calculate similarity to E. coli reference
+
     similarity = 0.0
     count = 0
-    
+
     for codon in set(list(seq_freq.keys()) + list(flat_codon_freq.keys())):
         seq_f = seq_freq.get(codon, 0.0)
         ref_f = flat_codon_freq.get(codon, 0.0)
-        # Use 1 - absolute difference as similarity measure
         similarity += 1 - abs(seq_f - ref_f)
         count += 1
-    
+
     return similarity / count if count > 0 else 0.0
 
 
@@ -288,23 +258,18 @@ def run_model_on_sequences(
     output_dir: str
 ) -> pd.DataFrame:
     """Run ColiFormer model on sequences and calculate metrics."""
-    
     results = []
-    
     print(f"Processing {len(sequences)} sequences...")
-    
+
     for seq_data in tqdm(sequences, desc="Optimizing sequences"):
         protein_seq = seq_data['protein_sequence']
-        
-        # Skip very short sequences (let model handle length limits)
+
         if len(protein_seq) < 10:
             continue
-        
+
         try:
-            # Start timing
             start_time = time.time()
-            
-            # Run model prediction
+
             output = predict_dna_sequence(
                 protein=protein_seq,
                 organism="Escherichia coli general",
@@ -313,15 +278,14 @@ def run_model_on_sequences(
                 deterministic=True,
                 match_protein=True,
             )
-            
+
             runtime = time.time() - start_time
-            
+
             if isinstance(output, list):
                 optimized_dna = output[0].predicted_dna
             else:
                 optimized_dna = output.predicted_dna
-            
-            # Calculate metrics for original sequence (if DNA)
+
             original_metrics = {}
             if seq_data['is_dna'] and seq_data['original_sequence']:
                 original_dna = seq_data['original_sequence'].upper()
@@ -332,8 +296,7 @@ def run_model_on_sequences(
                     'original_cfd': calculate_cfd(original_dna, codon_frequencies),
                     'original_neg_cis': count_negative_cis_elements(original_dna),
                 }
-            
-            # Calculate metrics for optimized sequence
+
             optimized_metrics = {
                 'optimized_cai': CAI(optimized_dna, weights=cai_weights),
                 'optimized_gc': get_GC_content(optimized_dna),
@@ -342,8 +305,7 @@ def run_model_on_sequences(
                 'optimized_neg_cis': count_negative_cis_elements(optimized_dna),
                 'runtime': runtime,
             }
-            
-            # Combine results
+
             result = {
                 'id': seq_data['id'],
                 'name': seq_data['name'],
@@ -353,43 +315,37 @@ def run_model_on_sequences(
                 **original_metrics,
                 **optimized_metrics,
             }
-            
             results.append(result)
-            
+
         except Exception as e:
             print(f"Error processing sequence {seq_data['id']}: {str(e)}")
             continue
-    
+
     return pd.DataFrame(results)
 
 
 def generate_visualizations(results_df: pd.DataFrame, output_dir: str):
     """Generate all required visualizations."""
-    
-    # Set style
     plt.style.use('seaborn-v0_8-darkgrid')
     sns.set_palette("husl")
-    
-    # Create output directory for figures
+
     fig_dir = os.path.join(output_dir, 'figures')
     os.makedirs(fig_dir, exist_ok=True)
-    
+
     # 1. Before/After CAI Graph
     if 'original_cai' in results_df.columns:
         plt.figure(figsize=(12, 8))
-        
-        # Prepare data
+
         before_cai = results_df['original_cai'].dropna()
         after_cai = results_df.loc[before_cai.index, 'optimized_cai']
-        
-        # Create bar plot
+
         x = np.arange(len(before_cai))
         width = 0.35
-        
+
         fig, ax = plt.subplots(figsize=(14, 8))
         bars1 = ax.bar(x - width/2, before_cai, width, label='Before Optimization', alpha=0.8)
         bars2 = ax.bar(x + width/2, after_cai, width, label='After Optimization', alpha=0.8)
-        
+
         ax.set_xlabel('Sequence Index', fontsize=12)
         ax.set_ylabel('CAI Score', fontsize=12)
         ax.set_title('ColiFormer: CAI Before and After Optimization', fontsize=14, fontweight='bold')
@@ -397,59 +353,55 @@ def generate_visualizations(results_df: pd.DataFrame, output_dir: str):
         ax.set_xticklabels(x[::5])
         ax.legend()
         ax.grid(axis='y', alpha=0.3)
-        
-        # Add improvement percentage
+
         avg_before = before_cai.mean()
         avg_after = after_cai.mean()
         improvement = ((avg_after - avg_before) / avg_before) * 100
-        
+
         ax.text(0.02, 0.98, f'Average CAI Before: {avg_before:.3f}\nAverage CAI After: {avg_after:.3f}\nImprovement: {improvement:.1f}%',
                 transform=ax.transAxes, fontsize=10, verticalalignment='top',
                 bbox=dict(boxstyle='round', facecolor='wheat', alpha=0.5))
-        
+
         plt.tight_layout()
         plt.savefig(os.path.join(fig_dir, 'cai_before_after.png'), dpi=300, bbox_inches='tight')
         plt.close()
-        
+
         print(f"CAI Before/After graph saved to {os.path.join(fig_dir, 'cai_before_after.png')}")
-        
+
         # 1b. Median CAI Before/After Graph
         plt.figure(figsize=(8, 6))
-        
+
         median_before = before_cai.median()
         median_after = after_cai.median()
-        
+
         categories = ['Before Optimization', 'After Optimization']
         medians = [median_before, median_after]
         colors = ['#ff7f0e', '#2ca02c']
-        
+
         bars = plt.bar(categories, medians, color=colors, alpha=0.8, width=0.6)
         plt.ylabel('Median CAI Score', fontsize=12)
         plt.title('ColiFormer: Median CAI Before and After Optimization', fontsize=14, fontweight='bold')
         plt.ylim(0, max(medians) * 1.2)
-        
-        # Add value labels on bars
+
         for bar, median in zip(bars, medians):
             plt.text(bar.get_x() + bar.get_width()/2, bar.get_height() + 0.01, 
                     f'{median:.3f}', ha='center', va='bottom', fontweight='bold')
-        
-        # Add improvement percentage
+
         improvement_pct = ((median_after - median_before) / median_before) * 100
         plt.text(0.5, max(medians) * 0.95, f'Improvement: {improvement_pct:.1f}%', 
                 ha='center', transform=plt.gca().transData, fontsize=12, 
                 bbox=dict(boxstyle='round', facecolor='lightblue', alpha=0.7))
-        
+
         plt.grid(axis='y', alpha=0.3)
         plt.tight_layout()
         plt.savefig(os.path.join(fig_dir, 'median_cai_comparison.png'), dpi=300, bbox_inches='tight')
         plt.close()
-        
+
         print(f"Median CAI comparison graph saved to {os.path.join(fig_dir, 'median_cai_comparison.png')}")
     
     # 2. Summary metrics table
     metrics_summary = {}
-    
-    # Calculate averages for all metrics
+
     if 'original_cai' in results_df.columns:
         metrics_summary['CAI'] = {
             'Before': results_df['original_cai'].mean(),
@@ -477,7 +429,6 @@ def generate_visualizations(results_df: pd.DataFrame, output_dir: str):
             'Reduction': results_df['original_neg_cis'].mean() - results_df['optimized_neg_cis'].mean()
         }
     else:
-        # Only optimized metrics available
         metrics_summary['CAI'] = {
             'Optimized': results_df['optimized_cai'].mean(),
             'Std Dev': results_df['optimized_cai'].std()
@@ -498,19 +449,16 @@ def generate_visualizations(results_df: pd.DataFrame, output_dir: str):
             'Optimized': results_df['optimized_neg_cis'].mean(),
             'Std Dev': results_df['optimized_neg_cis'].std()
         }
-    
-    # Add runtime statistics
+
     metrics_summary['Runtime (seconds)'] = {
         'Mean': results_df['runtime'].mean(),
         'Median': results_df['runtime'].median(),
         'Total': results_df['runtime'].sum()
     }
     
-    # Convert to DataFrame for nice display
     summary_df = pd.DataFrame(metrics_summary).T
     summary_df = summary_df.round(4)
     
-    # Save summary table
     summary_df.to_csv(os.path.join(output_dir, 'metrics_summary.csv'))
     print(f"\nMetrics Summary saved to {os.path.join(output_dir, 'metrics_summary.csv')}")
     print("\n" + "="*60)
@@ -518,7 +466,6 @@ def generate_visualizations(results_df: pd.DataFrame, output_dir: str):
     print("="*60)
     print(summary_df.to_string())
     
-    # 3. Distribution plots for each metric
     fig, axes = plt.subplots(2, 3, figsize=(15, 10))
     axes = axes.flatten()
     
@@ -539,7 +486,6 @@ def generate_visualizations(results_df: pd.DataFrame, output_dir: str):
             axes[idx].set_ylabel('Frequency')
             axes[idx].grid(axis='y', alpha=0.3)
             
-            # Add mean line
             mean_val = results_df[col].mean()
             axes[idx].axvline(mean_val, color='red', linestyle='--', linewidth=2, label=f'Mean: {mean_val:.3f}')
             axes[idx].legend()
@@ -571,7 +517,6 @@ def main():
     
     args = parser.parse_args()
     
-    # Create output directory
     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
     output_dir = os.path.join(args.output_dir, f"run_{timestamp}")
     os.makedirs(output_dir, exist_ok=True)
@@ -580,11 +525,9 @@ def main():
     print("COLIFORMER BENCHMARK EVALUATION")
     print("="*60)
     
-    # Setup device
     device = torch.device("cuda" if torch.cuda.is_available() and args.use_gpu else "cpu")
     print(f"Using device: {device}")
     
-    # Load sequences from Excel
     print(f"\nLoading sequences from {args.excel_path}...")
     sequences = parse_excel_sequences(
         args.excel_path,
@@ -594,26 +537,21 @@ def main():
     )
     print(f"Loaded {len(sequences)} sequences")
     
-    # Load model
     print("\nLoading ColiFormer model...")
     model = load_model(model_path=args.checkpoint_path, device=device)
     tokenizer = AutoTokenizer.from_pretrained("adibvafa/CodonTransformer")
     print("Model loaded successfully")
     
-    # Prepare evaluation utilities
     print("\nPreparing evaluation utilities...")
     
-    # Load natural sequences for CAI weights
     natural_df = pd.read_csv(args.natural_sequences_path)
     ref_sequences = natural_df['dna_sequence'].tolist()
     cai_weights = relative_adaptiveness(sequences=ref_sequences)
     print("CAI weights generated")
     
-    # tAI weights
     tai_weights = get_ecoli_tai_weights()
     print("tAI weights loaded")
     
-    # Codon frequencies
     try:
         codon_frequencies = download_codon_frequencies_from_kazusa(taxonomy_id=83333)
         print("Codon frequencies loaded from Kazusa")
@@ -623,10 +561,8 @@ def main():
             ref_sequences, organism="Escherichia coli general"
         )
     
-    # Reference profile for DTW (simplified for now)
     reference_profile = []
-    
-    # Run model on sequences
+
     print("\n" + "="*60)
     print("RUNNING OPTIMIZATION...")
     print("="*60)
@@ -643,12 +579,10 @@ def main():
         output_dir=output_dir
     )
     
-    # Save raw results
     results_path = os.path.join(output_dir, 'optimization_results.csv')
     results_df.to_csv(results_path, index=False)
     print(f"\nRaw results saved to {results_path}")
     
-    # Save optimized DNA sequences to a separate CSV
     optimized_sequences = results_df[['id', 'name', 'protein_sequence', 'optimized_dna']].copy()
     optimized_sequences['protein_length'] = results_df['protein_length']
     optimized_sequences['dna_length'] = optimized_sequences['optimized_dna'].apply(len)
@@ -656,7 +590,6 @@ def main():
     optimized_sequences['optimized_gc'] = results_df['optimized_gc']
     optimized_sequences['optimized_tai'] = results_df['optimized_tai']
     
-    # If original sequences exist, add improvement metrics
     if 'original_cai' in results_df.columns:
         optimized_sequences['original_cai'] = results_df['original_cai']
         optimized_sequences['cai_improvement'] = ((results_df['optimized_cai'] - results_df['original_cai']) / results_df['original_cai'] * 100).round(2)
@@ -665,7 +598,6 @@ def main():
     optimized_sequences.to_csv(optimized_sequences_path, index=False)
     print(f"Optimized DNA sequences saved to {optimized_sequences_path}")
     
-    # Generate visualizations and summary
     print("\n" + "="*60)
     print("GENERATING VISUALIZATIONS...")
     print("="*60)

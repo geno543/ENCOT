@@ -1,12 +1,8 @@
 """
-File: finetune.py
--------------------
 Finetune the CodonTransformer model.
 
-The pretrained model is loaded directly from Hugging Face.
-The dataset is a JSON file. You can use prepare_training_data from CodonData to
-prepare the dataset. The repository README has a guide on how to prepare the
-dataset and use this script.
+The pretrained model is loaded from Hugging Face. Prepare data with
+CodonData.prepare_training_data; see README for usage.
 """
 
 import argparse
@@ -26,7 +22,7 @@ from CodonTransformer.CodonUtils import (
     IterableJSONData,
 )
 
-# Suppress excessive INFO logs from transformers (e.g., BigBird attention fall-backs)
+# Reduce excessive INFO logs from transformers
 hf_logging.set_verbosity_warning()
 
 class MaskedTokenizerCollator:
@@ -124,7 +120,7 @@ class plTrainHarness(pl.LightningModule):
             try:
                 self.model.bert.set_attention_type("block_sparse")
             except Exception:
-                # Fallback silently if method missing (future-proof)
+                # Fallback silently if method missing
                 pass
 
         # Create GC lookup table for codons
@@ -158,7 +154,7 @@ class plTrainHarness(pl.LightningModule):
             lr=self.learning_rate,
         )
         
-        # Enhanced scheduler: CosineAnnealingWarmRestarts for better sequence task performance
+        # CosineAnnealingWarmRestarts scheduler
         lr_scheduler = {
             "scheduler": torch.optim.lr_scheduler.CosineAnnealingWarmRestarts(
                 optimizer,
@@ -260,7 +256,7 @@ class plTrainHarness(pl.LightningModule):
                         self.log("alm_iteration", self.alm_iteration_counter, on_step=True, prog_bar=False)
 
                     else:
-                        # Fallback to old penalty approach if not using Lagrangian
+                        # Penalty approach if not using Lagrangian
                         gc_dev = F.relu(torch.abs(mean_gc - self.gc_target) - 0.02)  # 2% tolerance
                         gc_loss = gc_dev
 
@@ -299,17 +295,7 @@ class DumpStateDict(pl.Callback):
 
 
 class ALMMonitoringCallback(pl.Callback):
-    """
-    Enhanced PyTorch Lightning callback for monitoring ALM system behavior during training.
-    
-    Provides comprehensive logging and analysis of:
-    - Lambda (Lagrangian multiplier) evolution
-    - Rho (penalty coefficient) adaptive updates
-    - Constraint violation progress
-    - ALM convergence metrics
-    
-    Inspired by research-level ALM implementations for optimal constraint handling.
-    """
+    """Monitor ALM behavior and log convergence metrics."""
     
     def __init__(self, log_every_n_steps=20, convergence_window=50):
         super().__init__()
@@ -348,7 +334,7 @@ class ALMMonitoringCallback(pl.Callback):
                     self.violation_history = self.violation_history[-self.convergence_window:]
                     self.step_history = self.step_history[-self.convergence_window:]
                 
-                # Log comprehensive ALM metrics to TensorBoard
+                # Log ALM metrics to TensorBoard
                 if trainer.logger is not None:
                     # Primary ALM metrics
                     trainer.logger.log_metrics({
@@ -456,8 +442,7 @@ class GCValidationHook(pl.Callback):
                             lambda_val = float(trainer.logged_metrics.get('lambda_gc', 0))
                             print(f"   Lambda: {lambda_val:.4f}")
 
-                        # Assert for development - comment out in production
-                        # assert within_target, f"GC content {current_gc_val:.3f} outside acceptable range after curriculum warm-up"
+                        
 
 
 def main(args):

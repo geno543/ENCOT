@@ -13,7 +13,6 @@ from typing import Dict, Optional, Tuple
 import warnings
 warnings.filterwarnings("ignore")
 
-# Import CodonTransformer modules
 import sys
 import os
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
@@ -34,7 +33,6 @@ from CAI import CAI, relative_adaptiveness
 from CodonTransformer.CodonUtils import get_organism2id_dict
 import json
 
-# Try to import post-processing features
 try:
     from CodonTransformer.CodonPostProcessing import (
         polish_sequence_with_dnachisel,
@@ -45,7 +43,6 @@ except ImportError:
     POST_PROCESSING_AVAILABLE = False
     DNACHISEL_AVAILABLE = False
 
-# Page configuration
 st.set_page_config(
     page_title="CodonTransformer GUI",
     page_icon="🧬",
@@ -53,7 +50,6 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-# Initialize session state
 if 'model' not in st.session_state:
     st.session_state.model = None
 if 'tokenizer' not in st.session_state:

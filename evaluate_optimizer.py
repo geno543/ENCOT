@@ -46,9 +46,6 @@ from CodonTransformer.CodonEvaluation import (
 )
 from CodonTransformer.CodonPostProcessing import (
     polish_sequence_with_dnachisel,
-    # enhanced_sequence_generation,  # Not available
-    # apply_pareto_filtering,  # Not available
-    # calculate_sequence_metrics,  # Not available
 )
 from CodonTransformer.CodonUtils import DNASequencePrediction
 

@@ -1342,8 +1342,6 @@ def get_icor_prediction(input_seq: str, model_path: str, stop_symbol: str) -> st
     aa_placement = aa2int(input_seq)
 
     # One-hot encode the amino acid sequence:
-
-    # style nit: more pythonic to write for i in range(0, len(aa_placement)):
     for i in range(0, len(aa_placement)):
         oh_array[aa_placement[i], i] = 1
         i += 1
