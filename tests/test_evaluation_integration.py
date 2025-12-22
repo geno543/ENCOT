@@ -55,7 +55,7 @@ def test_evaluation_integration():
     cai_weights = relative_adaptiveness(sequences=ref_sequences)
     tai_weights = get_ecoli_tai_weights()
     
-    print("✓ Reference data prepared")
+    print("OK: Reference data prepared")
     
     # Process test data
     results = []
@@ -101,10 +101,10 @@ def test_evaluation_integration():
                 print(f"  Metrics calculated:")
                 for metric, value in metrics.items():
                     print(f"    {metric.upper()}: {value:.3f}")
-                print(f"  ✓ Success")
+                print("  OK: Success")
                 
             except Exception as e:
-                print(f"  ✗ Error: {e}")
+                print(f"  FAIL: Error: {e}")
                 import traceback
                 traceback.print_exc()
     
@@ -115,7 +115,7 @@ def test_evaluation_integration():
     results_df = pd.DataFrame(results)
     
     if not results_df.empty:
-        print(f"✓ Created results DataFrame with {len(results_df)} entries")
+        print(f"OK: Created results DataFrame with {len(results_df)} entries")
         
         # Display summary statistics
         print("\nSummary Statistics:")
@@ -128,7 +128,7 @@ def test_evaluation_integration():
         output_path = "results/test_evaluation_results.csv"
         Path("results").mkdir(exist_ok=True)
         results_df.to_csv(output_path, index=False)
-        print(f"\n✓ Test results saved to {output_path}")
+        print(f"\nOK: Test results saved to {output_path}")
         
         # Validate metric ranges
         print("\nValidating metric ranges:")
@@ -144,21 +144,21 @@ def test_evaluation_integration():
             if col in results_df.columns:
                 values = results_df[col]
                 in_range = ((values >= min_val) & (values <= max_val)).all()
-                print(f"  {name}: {'✓' if in_range else '✗'} (range: {values.min():.3f} - {values.max():.3f})")
+                print(f"  {name}: {'OK' if in_range else 'FAIL'} (range: {values.min():.3f} - {values.max():.3f})")
             else:
-                print(f"  {name}: ✗ Column not found")
+                print(f"  {name}: FAIL (column not found)")
         
         print("\n" + "=" * 60)
         print("Enhanced evaluation pipeline test completed successfully!")
         return True
         
     else:
-        print("✗ No results generated")
+        print("FAIL: No results generated")
         return False
 
 if __name__ == "__main__":
     success = test_evaluation_integration()
     if success:
-        print("\n🎉 All tests passed! The enhanced evaluation framework is ready.")
+        print("\nOK: All tests passed. The enhanced evaluation framework is ready.")
     else:
-        print("\n❌ Tests failed. Please check the implementation.")
+        print("\nFAIL: Tests failed. Please check the implementation.")

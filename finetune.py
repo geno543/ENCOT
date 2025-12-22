@@ -430,21 +430,21 @@ class ALMMonitoringCallback(pl.Callback):
                 
                 # Detailed epoch summary
                 print(f"\n{'='*60}")
-                print(f"🔍 ALM System Analysis - Epoch {current_epoch}")
+                print(f"ALM System Analysis - Epoch {current_epoch}")
                 print(f"{'='*60}")
-                print(f"📊 Current State:")
+                print("Current State:")
                 print(f"   • GC Content: {float(mean_gc):.4f} (target: {pl_module.gc_target:.4f})")
                 print(f"   • Constraint Violation: {float(constraint_violation):.2e}")
                 print(f"   • Lambda (Multiplier): {float(lambda_gc):.4f}")
                 print(f"   • Rho (Penalty): {float(rho_adaptive):.2e}")
-                print(f"   • Converged: {'✅ Yes' if converged else '❌ No'}")
+                print(f"   • Converged: {'Yes' if converged else 'No'}")
                 
                 # Convergence diagnostics
                 if len(self.violation_history) >= 5:
                     recent_violations = self.violation_history[-5:]
                     improvement_rate = (recent_violations[0] - recent_violations[-1]) / max(recent_violations[0], 1e-8)
                     
-                    print(f"📈 Convergence Diagnostics:")
+                    print("Convergence Diagnostics:")
                     print(f"   • Recent Improvement Rate: {improvement_rate:.2%}")
                     print(f"   • Penalty Growth: {self.rho_history[-1] / max(self.rho_history[0], 1e-8):.2f}x")
                     print(f"   • Stability: {'Good' if max(recent_violations) - min(recent_violations) < 1e-3 else 'Improving'}")
@@ -489,9 +489,15 @@ class GCValidationHook(pl.Callback):
                         within_target = self.gc_target_min <= current_gc_val <= self.gc_target_max
 
                         if within_target:
-                            print(f"✅ Epoch {current_epoch}: GC content {current_gc_val:.3f} is within target range [{self.gc_target_min:.3f}, {self.gc_target_max:.3f}]")
+                            print(
+                                f"Epoch {current_epoch}: GC content {current_gc_val:.3f} is within target range "
+                                f"[{self.gc_target_min:.3f}, {self.gc_target_max:.3f}]"
+                            )
                         else:
-                            print(f"⚠️  Epoch {current_epoch}: GC content {current_gc_val:.3f} is outside target range [{self.gc_target_min:.3f}, {self.gc_target_max:.3f}]")
+                            print(
+                                f"Epoch {current_epoch}: GC content {current_gc_val:.3f} is outside target range "
+                                f"[{self.gc_target_min:.3f}, {self.gc_target_max:.3f}]"
+                            )
 
                         # Log lambda value if available
                         if 'lambda_gc' in trainer.logged_metrics:

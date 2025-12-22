@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Launcher script for CodonTransformer Streamlit GUI
+Launcher script for ColiFormer Streamlit GUI
 
 This script sets up the environment and launches the Streamlit application.
 """
@@ -23,16 +23,16 @@ def main():
     # Set working directory to parent directory so model paths work correctly
     os.chdir(parent_dir)
 
-    print("🧬 Starting CodonTransformer GUI...")
+    print("Starting ColiFormer GUI...")
     print(f"   Working directory: {parent_dir}")
     print(f"   Python path includes: {parent_dir}")
 
     # Check for model checkpoint
     model_path = parent_dir / "models" / "alm-enhanced-training" / "balanced_alm_finetune.ckpt"
     if model_path.exists():
-        print(f"✅ Found fine-tuned model: {model_path}")
+        print(f"Found fine-tuned model: {model_path}")
     else:
-        print("⚠️  Fine-tuned model not found, will use base model")
+        print("Fine-tuned model not found, will use base model")
 
     # Check for virtual environment
     venv_path = parent_dir / "codon_env"
@@ -42,17 +42,17 @@ def main():
         venv_python = venv_bin / "python"
 
         if venv_python.exists():
-            print(f"✅ Found virtual environment: {venv_path}")
+            print(f"Found virtual environment: {venv_path}")
             # Update PATH to include virtual environment
             current_path = os.environ.get("PATH", "")
             os.environ["PATH"] = f"{venv_bin}:{current_path}"
             # Use virtual environment Python
             python_executable = str(venv_python)
         else:
-            print("⚠️  Virtual environment found but Python executable missing")
+            print("Virtual environment found but Python executable missing")
             python_executable = sys.executable
     else:
-        print("⚠️  No virtual environment found, using system Python")
+        print("No virtual environment found, using system Python")
         python_executable = sys.executable
 
     print(f"   Using Python: {python_executable}")
@@ -61,9 +61,9 @@ def main():
     # Check if streamlit is installed
     try:
         import streamlit
-        print(f"✅ Streamlit version: {streamlit.__version__}")
+        print(f"Streamlit version: {streamlit.__version__}")
     except ImportError:
-        print("❌ Streamlit not found. Please install requirements:")
+        print("Streamlit not found. Please install requirements:")
         print("   pip install -r requirements.txt")
         return 1
 
@@ -71,14 +71,14 @@ def main():
     try:
         import torch
         device = "GPU" if torch.cuda.is_available() else "CPU"
-        print(f"✅ PyTorch available, using: {device}")
+        print(f"PyTorch available, using: {device}")
     except ImportError:
-        print("❌ PyTorch not found. Please install requirements:")
+        print("PyTorch not found. Please install requirements:")
         print("   pip install -r requirements.txt")
         return 1
 
     print()
-    print("🚀 Launching GUI...")
+    print("Launching GUI...")
     print("   The application will open in your default web browser")
     print("   Press Ctrl+C to stop the server")
     print()
@@ -92,10 +92,10 @@ def main():
             "--server.address", "0.0.0.0"
         ])
     except KeyboardInterrupt:
-        print("\n👋 Shutting down CodonTransformer GUI...")
+        print("\nShutting down ColiFormer GUI...")
         return 0
     except Exception as e:
-        print(f"❌ Error launching Streamlit: {e}")
+        print(f"Error launching Streamlit: {e}")
         return 1
 
 if __name__ == "__main__":

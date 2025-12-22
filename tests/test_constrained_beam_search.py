@@ -94,28 +94,28 @@ def test_basic_functionality():
         # Calculate GC content
         gc_content = calculate_gc_content(dna_sequence)
         
-        print(f"✓ Generated DNA sequence: {dna_sequence}")
-        print(f"✓ GC content: {gc_content:.3f} (target: {gc_bounds[0]:.2f}-{gc_bounds[1]:.2f})")
+        print(f"OK: Generated DNA sequence: {dna_sequence}")
+        print(f"OK: GC content: {gc_content:.3f} (target: {gc_bounds[0]:.2f}-{gc_bounds[1]:.2f})")
         
         # Verify GC bounds
         if gc_bounds[0] <= gc_content <= gc_bounds[1]:
-            print("✓ GC content within bounds")
+            print("OK: GC content within bounds")
         else:
-            print("✗ GC content outside bounds")
+            print("FAIL: GC content outside bounds")
             return False
         
         # Verify sequence length
         expected_length = seq_len * 3
         if len(dna_sequence) == expected_length:
-            print(f"✓ Sequence length correct: {len(dna_sequence)} bp")
+            print(f"OK: Sequence length correct: {len(dna_sequence)} bp")
         else:
-            print(f"✗ Sequence length incorrect: {len(dna_sequence)} (expected {expected_length})")
+            print(f"FAIL: Sequence length incorrect: {len(dna_sequence)} (expected {expected_length})")
             return False
         
         return True
         
     except Exception as e:
-        print(f"✗ Error in basic functionality test: {e}")
+        print(f"FAIL: Error in basic functionality test: {e}")
         return False
 
 
@@ -148,21 +148,21 @@ def test_gc_bounds_enforcement():
         dna_sequence = "".join([token[-3:] for token in dna_tokens]).upper()
         gc_content = calculate_gc_content(dna_sequence)
         
-        print(f"✓ Generated sequence with strict bounds")
-        print(f"✓ GC content: {gc_content:.3f} (target: {strict_bounds[0]:.2f}-{strict_bounds[1]:.2f})")
+        print("OK: Generated sequence with strict bounds")
+        print(f"OK: GC content: {gc_content:.3f} (target: {strict_bounds[0]:.2f}-{strict_bounds[1]:.2f})")
         
         # Verify strict bounds (allow small tolerance due to position-aware penalties)
         tolerance = 0.02  # 2% tolerance for position-aware penalty mechanism
         if (strict_bounds[0] - tolerance) <= gc_content <= (strict_bounds[1] + tolerance):
-            print("✓ Strict GC bounds respected (within tolerance)")
+            print("OK: Strict GC bounds respected (within tolerance)")
             return True
         else:
-            print("✗ Strict GC bounds violated beyond tolerance")
+            print("FAIL: Strict GC bounds violated beyond tolerance")
             return False
             
     except Exception as e:
         print(f"Note: Strict bounds test failed as expected: {e}")
-        print("✓ This is expected behavior when constraints are too restrictive")
+        print("OK: This is expected behavior when constraints are too restrictive")
         return True
 
 
@@ -194,21 +194,21 @@ def test_beam_rescue():
         dna_sequence = "".join([token[-3:] for token in dna_tokens]).upper()
         gc_content = calculate_gc_content(dna_sequence)
         
-        print(f"✓ Beam rescue succeeded")
-        print(f"✓ Final GC content: {gc_content:.3f}")
+        print("OK: Beam rescue succeeded")
+        print(f"OK: Final GC content: {gc_content:.3f}")
         
         # The rescue mechanism should have found a solution, possibly with relaxed bounds
         return True
         
     except ValueError as e:
         if "rescue failed" in str(e):
-            print("✓ Beam rescue properly failed after exhausting attempts")
+            print("OK: Beam rescue properly failed after exhausting attempts")
             return True
         else:
-            print(f"✗ Unexpected error: {e}")
+            print(f"FAIL: Unexpected error: {e}")
             return False
     except Exception as e:
-        print(f"✗ Unexpected error in beam rescue test: {e}")
+        print(f"FAIL: Unexpected error in beam rescue test: {e}")
         return False
 
 
@@ -232,9 +232,9 @@ def run_all_tests():
         results.append((test_name, success))
         
         if success:
-            print(f"✓ {test_name} PASSED")
+            print(f"OK: {test_name} PASSED")
         else:
-            print(f"✗ {test_name} FAILED")
+            print(f"FAIL: {test_name} FAILED")
     
     # Summary
     print("\n" + "=" * 60)
@@ -251,10 +251,10 @@ def run_all_tests():
     print(f"\nTotal: {passed}/{total} tests passed")
     
     if passed == total:
-        print("🎉 All tests passed! Constrained beam search is working correctly.")
+        print("All tests passed. Constrained beam search is working correctly.")
         return True
     else:
-        print("⚠️  Some tests failed. Please review the implementation.")
+        print("Some tests failed. Please review the implementation.")
         return False
 
 

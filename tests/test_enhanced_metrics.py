@@ -44,10 +44,10 @@ def test_enhanced_metrics():
             # Validate ranges
             assert 1.0 <= enc_value <= 61.0, f"ENC value {enc_value} out of expected range [1.0, 61.0]"
             assert 0.0 <= scuo_value <= 1.0, f"SCUO value {scuo_value} out of expected range [0.0, 1.0]"
-            print(f"  ✓ All metrics calculated successfully")
+            print("  OK: All metrics calculated successfully")
             
         except Exception as e:
-            print(f"  ✗ Error calculating metrics: {e}")
+            print(f"  FAIL: Error calculating metrics: {e}")
             import traceback
             traceback.print_exc()
     
@@ -65,9 +65,9 @@ def test_enhanced_metrics():
     try:
         cpb_with_ref = calculate_CPB(target_sequence, reference_seqs)
         print(f"CPB with reference sequences: {cpb_with_ref:.3f}")
-        print("✓ CPB with reference calculation successful")
+        print("OK: CPB with reference calculation successful")
     except Exception as e:
-        print(f"✗ Error calculating CPB with reference: {e}")
+        print(f"FAIL: Error calculating CPB with reference: {e}")
     
     print("\n" + "=" * 50)
     print("Validation of biological expectations:")
@@ -87,7 +87,7 @@ def test_enhanced_metrics():
     print("  - Negative values: Codon pairs less frequent than expected")
     print("  - Values near 0: Random codon pair usage")
     
-    print("\n✓ Enhanced codon usage metrics test completed successfully!")
+    print("\nOK: Enhanced codon usage metrics test completed successfully!")
 
 if __name__ == "__main__":
     test_enhanced_metrics()

@@ -36,38 +36,38 @@ def test_library_integration():
         # Test ENC calculation
         try:
             enc_value = calculate_ENC(sequence)
-            print(f"  ✓ ENC: {enc_value:.3f}")
+            print(f"  OK: ENC: {enc_value:.3f}")
             
             # Validate ENC range
             if 1.0 <= enc_value <= 61.0:
-                print(f"    ✓ ENC in valid range [1.0, 61.0]")
+                print("    OK: ENC in valid range [1.0, 61.0]")
             else:
-                print(f"    ✗ ENC {enc_value} outside valid range")
+                print(f"    FAIL: ENC {enc_value} outside valid range")
                 
         except Exception as e:
-            print(f"  ✗ ENC calculation failed: {e}")
+            print(f"  FAIL: ENC calculation failed: {e}")
         
         # Test CPB calculation
         try:
             cpb_value = calculate_CPB(sequence, reference_sequences)
-            print(f"  ✓ CPB: {cpb_value:.3f}")
+            print(f"  OK: CPB: {cpb_value:.3f}")
             
         except Exception as e:
-            print(f"  ✗ CPB calculation failed: {e}")
+            print(f"  FAIL: CPB calculation failed: {e}")
         
         # Test SCUO calculation
         try:
             scuo_value = calculate_SCUO(sequence)
-            print(f"  ✓ SCUO: {scuo_value:.3f}")
+            print(f"  OK: SCUO: {scuo_value:.3f}")
             
             # Validate SCUO range
             if 0.0 <= scuo_value <= 1.0:
-                print(f"    ✓ SCUO in valid range [0.0, 1.0]")
+                print("    OK: SCUO in valid range [0.0, 1.0]")
             else:
-                print(f"    ✗ SCUO {scuo_value} outside valid range")
+                print(f"    FAIL: SCUO {scuo_value} outside valid range")
                 
         except Exception as e:
-            print(f"  ✗ SCUO calculation failed: {e}")
+            print(f"  FAIL: SCUO calculation failed: {e}")
     
     print("\\n" + "=" * 60)
     print("Testing comparative analysis...")
@@ -78,12 +78,12 @@ def test_library_integration():
         enc2 = calculate_ENC(test_sequences["biased"])
         
         if abs(enc1 - enc2) > 0.01:  # Should be different
-            print(f"✓ ENC differentiates sequences: {enc1:.3f} vs {enc2:.3f}")
+            print(f"OK: ENC differentiates sequences: {enc1:.3f} vs {enc2:.3f}")
         else:
-            print(f"⚠ ENC values very similar: {enc1:.3f} vs {enc2:.3f}")
+            print(f"NOTE: ENC values very similar: {enc1:.3f} vs {enc2:.3f}")
             
     except Exception as e:
-        print(f"✗ ENC comparison failed: {e}")
+        print(f"FAIL: ENC comparison failed: {e}")
     
     print("\\n" + "=" * 60)
     print("Library integration tests completed!")
@@ -104,11 +104,11 @@ def test_library_integration():
         print(f"  CPB: {cpb_val:.3f}")
         print(f"  SCUO: {scuo_val:.3f}")
         
-        print("\\n✅ All library integrations working correctly!")
+        print("\\nOK: All library integrations working correctly.")
         return True
         
     except Exception as e:
-        print(f"\\n❌ Integration test failed: {e}")
+        print(f"\\nFAIL: Integration test failed: {e}")
         import traceback
         traceback.print_exc()
         return False
@@ -117,6 +117,6 @@ if __name__ == "__main__":
     success = test_library_integration()
     
     if success:
-        print("\\n🎉 Library integration successful! Enhanced evaluation framework ready.")
+        print("\\nLibrary integration successful. Enhanced evaluation framework ready.")
     else:
-        print("\\n⚠️ Some integration issues detected. Check implementation.")
+        print("\\nSome integration issues detected. Check implementation.")

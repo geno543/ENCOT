@@ -1,7 +1,7 @@
 """
 File: app.py
 -------------
-Streamlit GUI for CodonTransformer. Provides sequence validation, optimization,
+Streamlit GUI for ColiFormer. Provides sequence validation, optimization,
 and visualization for E. coli-focused workflows with optional post-processing.
 """
 
@@ -51,8 +51,7 @@ except ImportError:
     DNACHISEL_AVAILABLE = False
 
 st.set_page_config(
-    page_title="CodonTransformer GUI",
-    page_icon="🧬",
+    page_title="ColiFormer GUI",
     layout="wide",
     initial_sidebar_state="expanded"
 )
@@ -95,7 +94,7 @@ def get_organism_tai_weights(organism: str) -> Dict[str, float]:
 def load_model_and_tokenizer():
     """Load the model and tokenizer with progress tracking"""
     if st.session_state.model is None or st.session_state.tokenizer is None:
-        with st.spinner("Loading CodonTransformer model... This may take a few minutes."):
+        with st.spinner("Loading model... This may take a few minutes."):
             progress_bar = st.progress(0)
             status_text = st.empty()
 
@@ -110,23 +109,23 @@ def load_model_and_tokenizer():
                 # Download the checkpoint file from Hugging Face
                 from huggingface_hub import hf_hub_download
                 
-                status_text.text("⬇️ Downloading model from saketh11/ColiFormer...")
+                status_text.text("Downloading model from saketh11/ColiFormer...")
                 model_path = hf_hub_download(
                     repo_id="saketh11/ColiFormer",
                     filename="balanced_alm_finetune.ckpt",
                     cache_dir="./hf_cache"
                 )
                 
-                status_text.text("🔄 Loading downloaded model...")
+                status_text.text("Loading downloaded model...")
                 st.session_state.model = load_model(
                     model_path=model_path,
                     device=st.session_state.device,
                     attention_type="original_full"
                 )
-                status_text.text("✅ Fine-tuned model loaded from Hugging Face (6.2% better CAI)")
+                status_text.text("Fine-tuned model loaded from Hugging Face")
                 st.session_state.model_type = "fine_tuned_hf"
             except Exception as e:
-                status_text.text(f"⚠️ Failed to load from Hugging Face: {str(e)[:50]}...")
+                status_text.text(f"Failed to load from Hugging Face: {str(e)[:50]}...")
                 status_text.text("Loading base model as fallback...")
                 st.session_state.model = BigBirdForMaskedLM.from_pretrained("adibvafa/CodonTransformer")
                 st.session_state.model = st.session_state.model.to(st.session_state.device)
@@ -181,22 +180,22 @@ def load_reference_data(organism: str = "Escherichia coli general"):
     if 'cai_weights' not in st.session_state or st.session_state['cai_weights'] is None:
         try:
             # Download reference sequences from Hugging Face
-            with st.spinner("📥 Downloading E. coli reference sequences from Hugging Face..."):
+            with st.spinner("Downloading E. coli reference sequences from Hugging Face..."):
                 ref_sequences = download_reference_data()
                 st.session_state['cai_weights'] = relative_adaptiveness(sequences=ref_sequences)
                 if len(ref_sequences) > 100:  # If we got the full dataset
-                    st.success(f"✅ Downloaded {len(ref_sequences):,} E. coli reference sequences for CAI calculation")
+                    st.success(f"Downloaded {len(ref_sequences):,} E. coli reference sequences for CAI calculation")
                 else:
-                    st.info(f"⚠️ Using {len(ref_sequences)} minimal reference sequences (full dataset unavailable)")
+                    st.info(f"Using {len(ref_sequences)} minimal reference sequences (full dataset unavailable)")
         except Exception as e:
             st.error(f"Error loading E. coli reference data: {e}")
             st.session_state['cai_weights'] = {}
     # tAI weights (E. coli only)
     if 'tai_weights' not in st.session_state or st.session_state['tai_weights'] is None:
         try:
-            with st.spinner("📥 Downloading E. coli tAI weights from Hugging Face..."):
+            with st.spinner("Downloading E. coli tAI weights from Hugging Face..."):
                 st.session_state['tai_weights'] = download_tai_weights()
-                st.success("✅ Downloaded E. coli tAI weights")
+                st.success("Downloaded E. coli tAI weights")
         except Exception as e:
             st.error(f"Error loading E. coli tAI weights: {e}")
             st.session_state['tai_weights'] = {}
@@ -626,8 +625,8 @@ def run_optimization(protein: str, organism: str, use_post_processing: bool = Fa
         st.session_state.optimization_running = False
 
 def main():
-    st.title("🧬 ColiFormer")
-    st.markdown("**State-of-the-art E. coli codon optimization for publication-quality research**")
+    st.title("ColiFormer")
+    st.markdown("E. coli codon optimization with constraint-aware decoding and in silico evaluation metrics.")
 
     # Remove the performance highlights expander (details/summary block)
     # (No expander here anymore)
@@ -636,7 +635,7 @@ def main():
     load_model_and_tokenizer()
 
     # Create the main tabbed interface
-    tab1, tab2, tab3, tab4 = st.tabs(["🧬 Single Optimize", "📁 Batch Process", "📊 Comparative Analysis", "⚙️ Advanced Settings"])
+    tab1, tab2, tab3, tab4 = st.tabs(["Single Optimize", "Batch Process", "Comparative Analysis", "Advanced Settings"])
 
     with tab1:
         single_sequence_optimization()
@@ -653,7 +652,7 @@ def main():
 def single_sequence_optimization():
     """Single sequence optimization interface - enhanced from original functionality"""
     # Sidebar configuration 
-    st.sidebar.header("🔧 Configuration")
+    st.sidebar.header("Configuration")
     organism_options = [
         "Escherichia coli general",
         "Saccharomyces cerevisiae",
@@ -663,7 +662,7 @@ def single_sequence_optimization():
     ]
     organism = st.sidebar.selectbox("Select Target Organism", organism_options)
     load_reference_data(organism)
-    with st.sidebar.expander("🔧 Advanced Optimization Settings"):
+    with st.sidebar.expander("Advanced Optimization Settings"):
         st.markdown("**Model Parameters**")
         use_deterministic = st.checkbox("Deterministic Mode", value=True, help="Use deterministic decoding for reproducible results")
         match_protein = st.checkbox("Match Protein Validation", value=True, help="Ensure DNA translates back to exact protein")
@@ -676,7 +675,7 @@ def single_sequence_optimization():
             ["EcoRI", "BamHI", "HindIII", "XhoI", "NotI"],
             default=["EcoRI", "BamHI"]
         )
-    st.sidebar.subheader("🔬 Post-Processing")
+    st.sidebar.subheader("Post-Processing")
     use_post_processing = st.sidebar.checkbox(
         "Enable DNAChisel Post-Processing",
         value=False,
@@ -684,29 +683,29 @@ def single_sequence_optimization():
         help="Polish sequences to remove restriction sites, homopolymers, and synthesis issues"
     )
     if not POST_PROCESSING_AVAILABLE:
-        st.sidebar.warning("⚠️ DNAChisel not available. Install with: pip install dnachisel")
+        st.sidebar.warning("DNAChisel not available. Install with: pip install dnachisel")
     
     # Dataset Information
     st.sidebar.markdown("---")
-    st.sidebar.markdown("### 📊 Dataset Information")
+    st.sidebar.markdown("### Dataset Information")
     st.sidebar.markdown("""
     - **Dataset**: [ColiFormer-Data](https://huggingface.co/datasets/saketh11/ColiFormer-Data)
-    - **Training**: 4,300 high-CAI E. coli sequences
-    - **Reference**: 50,000+ E. coli gene sequences  
+    - **Training**: 3,676 high-expression E. coli genes (NCBI-curated)
+    - **Evaluation**: 37,053 native E. coli genes + 80 recombinant protein targets
     - **Auto-download**: CAI weights & tAI coefficients
     """)
     
     # Model Information
-    st.sidebar.markdown("### 🤖 Model Information")
+    st.sidebar.markdown("### Model Information")
     st.sidebar.markdown("""
     - **Model**: [ColiFormer](https://huggingface.co/saketh11/ColiFormer)
-    - **Improvement**: +6.2% CAI vs base model
+    - **Base**: CodonTransformer BigBird architecture
     - **Architecture**: BigBird Transformer + ALM
     - **Auto-download**: From Hugging Face Hub
     """)
     col1, col2 = st.columns([1, 1])
     with col1:
-        st.header("🧬 Input Sequence")
+        st.header("Input Sequence")
         sequence_input = st.text_area(
             "Enter Protein or DNA Sequence",
             height=150,
@@ -716,20 +715,20 @@ def single_sequence_optimization():
         if sequence_input and analyze_btn:
             is_valid, message, sequence_type, fixed_sequence = validate_sequence(sequence_input)
             if is_valid:
-                st.success(f"✅ {message}")
+                st.success(message)
                 # Store in session state for use by Optimize Sequence
                 st.session_state.sequence_clean = fixed_sequence
                 st.session_state.sequence_type = sequence_type
                 st.session_state.input_metrics = calculate_input_metrics(fixed_sequence, organism, sequence_type)
                 st.session_state.organism = organism
             else:
-                st.error(f"❌ {message}")
+                st.error(message)
                 if "Invalid characters" in message:
-                    st.info("💡 **Suggestion:** Remove spaces, numbers, and special characters. Use only standard amino acid letters (A-Z) for proteins or nucleotides (ATGC) for DNA.")
+                    st.info("Suggestion: Remove spaces, numbers, and special characters. Use only standard amino acid letters (A–Z) for proteins or nucleotides (A/T/G/C) for DNA.")
                 elif "too long" in message:
-                    st.info("💡 **Suggestion:** Consider breaking long sequences into smaller segments for optimization.")
+                    st.info("Suggestion: Consider breaking long sequences into smaller segments for optimization.")
                 elif "too short" in message:
-                    st.info("💡 **Suggestion:** Minimum length is 3 characters. Ensure your sequence is complete.")
+                    st.info("Suggestion: Minimum length is 3 characters. Ensure your sequence is complete.")
                 # Clear session state if invalid
                 st.session_state.sequence_clean = None
                 st.session_state.sequence_type = None
@@ -745,7 +744,7 @@ def single_sequence_optimization():
         if st.session_state.get('input_metrics') and st.session_state.get('sequence_type'):
             input_metrics = st.session_state.input_metrics
             sequence_type = st.session_state.sequence_type
-            st.subheader("📊 Input Analysis")
+            st.subheader("Input Analysis")
             metrics_col1, metrics_col2, metrics_col3 = st.columns(3)
             with metrics_col1:
                 unit = "codons" if sequence_type == "dna" else "AA"
@@ -767,7 +766,7 @@ def single_sequence_optimization():
                     st.metric(label, f"{tai_val:.3f}")
                 else:
                     st.metric("tAI", "N/A")
-            st.subheader("🔍 Sequence Quality Analysis")
+            st.subheader("Sequence Quality Analysis")
             analysis_col1, analysis_col2, analysis_col3 = st.columns(3)
             with analysis_col1:
                 sites_count = input_metrics.get('restriction_sites', 0) if input_metrics else 0
@@ -781,7 +780,7 @@ def single_sequence_optimization():
                 st.metric("Homopolymer Runs", homo_runs)
             baseline_dna = input_metrics.get('baseline_dna', '') if input_metrics else ''
             if baseline_dna and len(baseline_dna) > 150:
-                st.subheader("📈 GC Content Distribution")
+                st.subheader("GC Content Distribution")
                 fig = create_gc_content_plot(baseline_dna)
                 fig.update_layout(
                     title="Input Sequence GC Content Analysis",
@@ -792,7 +791,7 @@ def single_sequence_optimization():
                 st.plotly_chart(fig, use_container_width=True)
 
     with col2:
-        st.header("🚀 Optimization Results")
+        st.header("Optimization Results")
         # Enhanced optimization button
         if (
             st.session_state.get('sequence_clean')
@@ -809,7 +808,7 @@ def single_sequence_optimization():
                 • GC target: {gc_target_min}-{gc_target_max}%
                 • Mode: {'Deterministic' if use_deterministic else 'Stochastic'}
                 """)
-            if st.button("🚀 Optimize Sequence", type="primary", use_container_width=True):
+            if st.button("Optimize Sequence", type="primary", use_container_width=True):
                 st.session_state.results = None
                 if st.session_state.sequence_type == "dna":
                     protein_sequence = translate_dna_to_protein(st.session_state.sequence_clean)
@@ -819,7 +818,7 @@ def single_sequence_optimization():
 
         # Enhanced progress display
         if st.session_state.optimization_running:
-            st.info("🔄 **Optimizing sequence with our model...**")
+            st.info("Optimizing sequence...")
 
             # Create progress container
             progress_container = st.container()
@@ -829,11 +828,11 @@ def single_sequence_optimization():
 
                 # Enhanced progress steps
                 steps = [
-                    "🔍 Analyzing input sequence structure...",
-                    "🧬 Loading fine-tuned CodonTransformer model...",
-                    "⚡ Running optimization algorithm...",
-                    "🎯 Optimizing GC content for synthesis...",
-                    "✅ Finalizing optimized sequence..."
+                    "Analyzing input sequence structure...",
+                    "Loading model...",
+                    "Running optimization algorithm...",
+                    "Applying GC/content constraints...",
+                    "Finalizing optimized sequence..."
                 ]
 
                 for i, step in enumerate(steps):
@@ -848,7 +847,7 @@ def single_sequence_optimization():
         # Enhanced results display
         if st.session_state.results and not st.session_state.optimization_running:
             if isinstance(st.session_state.results, str):
-                st.error(f"❌ **Optimization Failed:** {st.session_state.results}")
+                st.error(f"Optimization failed: {st.session_state.results}")
             else:
                 display_optimization_results(
                     st.session_state.results, 
@@ -885,10 +884,10 @@ def display_optimization_results(result, organism, original_sequence, sequence_t
         optimized_metrics['tai'] = None
 
     # Success header
-    st.success("✅ **Optimization Complete!** ")
+    st.success("Optimization complete.")
 
     # Key improvements summary
-    st.subheader("🎯 Optimization Improvements")
+    st.subheader("Optimization Improvements")
     imp_col1, imp_col2, imp_col3 = st.columns(3)
 
     if input_metrics is not None:
@@ -908,14 +907,14 @@ def display_optimization_results(result, organism, original_sequence, sequence_t
                 st.metric("tAI Score", f"{optimized_metrics['tai']:.3f}", delta=f"{tai_change:+.3f}")
 
     # Optimized DNA sequence display
-    st.subheader("🧬 Optimized DNA Sequence")
+    st.subheader("Optimized DNA Sequence")
     st.text_area("Optimized DNA Sequence", result.predicted_dna, height=100)
 
     # Enhanced download and export options
     col1, col2, col3 = st.columns(3)
     with col1:
         st.download_button(
-            label="📥 Download DNA (FASTA)",
+            label="Download DNA (FASTA)",
             data=f">Optimized_{organism.replace(' ', '_')}\n{result.predicted_dna}",
             file_name=f"optimized_sequence_{organism.replace(' ', '_')}.fasta",
             mime="text/plain"
@@ -931,17 +930,17 @@ def display_optimization_results(result, organism, original_sequence, sequence_t
             csv_data += f"tAI Score,{input_metrics['tai']:.3f},{optimized_metrics['tai']:.3f},{optimized_metrics['tai'] - input_metrics['tai']:+.3f}\n"
 
         st.download_button(
-            label="📊 Download Metrics (CSV)",
+            label="Download Metrics (CSV)",
             data=csv_data,
             file_name=f"optimization_metrics_{organism.replace(' ', '_')}.csv",
             mime="text/csv"
         )
 
     with col3:
-        st.button("📄 Generate PDF Report", help="Coming soon: Publication-quality PDF report")
+        st.button("Generate PDF Report", help="Coming soon: PDF report")
 
     # Enhanced comparison visualizations
-    st.subheader("📊 Before vs After Analysis")
+    st.subheader("Before vs After Analysis")
 
     # Create enhanced comparison charts
     create_enhanced_comparison_charts(input_metrics, optimized_metrics, original_sequence, result.predicted_dna, sequence_type)
@@ -972,7 +971,7 @@ def create_enhanced_comparison_charts(input_metrics, optimized_metrics, original
         st.plotly_chart(expr_comp_fig, use_container_width=True)
 
     # Side-by-side GC distribution analysis
-    st.subheader("📈 GC Content Distribution Analysis")
+    st.subheader("GC Content Distribution Analysis")
     col1, col2 = st.columns(2)
 
     with col1:
@@ -997,11 +996,11 @@ def create_enhanced_comparison_charts(input_metrics, optimized_metrics, original
 
 def batch_processing_interface():
     """Batch processing interface for multiple sequences"""
-    st.header("📁 Batch Processing")
+    st.header("Batch Processing")
     st.markdown("**Process multiple protein sequences simultaneously with optimization**")
 
     # File upload section
-    st.subheader("📤 Upload Sequences")
+    st.subheader("Upload Sequences")
     uploaded_file = st.file_uploader(
         "Choose a file with multiple sequences",
         type=['csv', 'xlsx', 'fasta', 'txt', 'fa'],
@@ -1009,7 +1008,7 @@ def batch_processing_interface():
     )
 
     if uploaded_file:
-        st.success(f"✅ File uploaded: {uploaded_file.name}")
+        st.success(f"File uploaded: {uploaded_file.name}")
 
         # Process uploaded file
         try:
@@ -1051,7 +1050,7 @@ def batch_processing_interface():
                 content = uploaded_file.read().decode('utf-8')
                 sequences, names = parse_fasta_content(content)
 
-            st.info(f"📊 Found {len(sequences)} sequences ready for optimization")
+            st.info(f"Found {len(sequences)} sequences ready for optimization")
 
             # Batch configuration
             col1, col2 = st.columns(2)
@@ -1063,7 +1062,7 @@ def batch_processing_interface():
                 max_sequences = st.number_input("Max sequences to process", 1, len(sequences), min(10, len(sequences)))
 
             # Start batch processing
-            if st.button("🚀 Start Batch Optimization", type="primary"):
+            if st.button("Start Batch Optimization", type="primary"):
                 run_batch_optimization(sequences[:max_sequences], names[:max_sequences], batch_organism)
 
         except Exception as e:
@@ -1188,11 +1187,11 @@ def run_batch_optimization(sequences, names, organism):
 
     progress_bar.empty()
     status_text.empty()
-    st.success(f"✅ Batch optimization complete! Processed {len(st.session_state.batch_results)} sequences.")
+    st.success(f"Batch optimization complete. Processed {len(st.session_state.batch_results)} sequences.")
 
 def display_batch_results():
     """Display batch processing results"""
-    st.subheader("📊 Batch Results")
+    st.subheader("Batch Results")
 
     # Show all logs (auto-fixes and errors)
     if hasattr(st.session_state, 'batch_logs') and st.session_state.batch_logs:
@@ -1216,7 +1215,7 @@ def display_batch_results():
         st.metric("Avg tAI After", f"{results_df['tai_after'].mean():.3f}")
 
     # CAI Extremes Analysis
-    st.subheader("🎯 CAI Performance Analysis")
+    st.subheader("CAI Performance Analysis")
     
     # Filter out rows with NaN CAI values for analysis
     valid_cai_df = results_df.dropna(subset=['cai_after'])
@@ -1232,7 +1231,7 @@ def display_batch_results():
         col1, col2 = st.columns(2)
         
         with col1:
-            st.markdown("**🔻 Lowest CAI Sequence**")
+            st.markdown("**Lowest CAI Sequence**")
             st.write(f"**Name:** {lowest_cai_row['name']}")
             st.metric("CAI Score", f"{lowest_cai_row['cai_after']:.3f}")
             st.metric("GC Content", f"{lowest_cai_row['gc_content_after']:.1f}%")
@@ -1245,7 +1244,7 @@ def display_batch_results():
                 st.metric("CAI Improvement", f"{cai_improvement:+.3f}")
         
         with col2:
-            st.markdown("**🔺 Highest CAI Sequence**")
+            st.markdown("**Highest CAI Sequence**")
             st.write(f"**Name:** {highest_cai_row['name']}")
             st.metric("CAI Score", f"{highest_cai_row['cai_after']:.3f}")
             st.metric("GC Content", f"{highest_cai_row['gc_content_after']:.1f}%")
@@ -1258,7 +1257,7 @@ def display_batch_results():
                 st.metric("CAI Improvement", f"{cai_improvement:+.3f}")
         
         # CAI Distribution Chart
-        st.subheader("📊 CAI Distribution")
+        st.subheader("CAI Distribution")
         fig = go.Figure()
         fig.add_trace(go.Histogram(
             x=valid_cai_df['cai_after'],
@@ -1292,7 +1291,7 @@ def display_batch_results():
         st.plotly_chart(fig, use_container_width=True)
 
         # GC Content Distribution Chart
-        st.subheader("📊 GC Content Distribution")
+        st.subheader("GC Content Distribution")
         valid_gc_df = results_df.dropna(subset=['gc_content_after'])
         if len(valid_gc_df) > 0:
             lowest_gc_idx = valid_gc_df['gc_content_after'].idxmin()
@@ -1329,10 +1328,10 @@ def display_batch_results():
             )
             st.plotly_chart(fig_gc, use_container_width=True)
         else:
-            st.warning("⚠️ No valid GC content values found in the batch results.")
+            st.warning("No valid GC content values found in the batch results.")
         
     else:
-        st.warning("⚠️ No valid CAI scores found in the batch results. Check if CAI weights are properly loaded.")
+        st.warning("No valid CAI scores found in the batch results. Check if CAI weights are properly loaded.")
 
     # Sequence selector
     seq_names = results_df['name'].tolist()
@@ -1371,7 +1370,7 @@ def display_batch_results():
         st.info("Sequence(s) too short for sliding window analysis")
 
     # Download batch results
-    if st.button("📥 Download Batch Results"):
+    if st.button("Download Batch Results"):
         csv_data = results_df.to_csv(index=False)
         st.download_button(
             label="Download CSV",
@@ -1382,70 +1381,52 @@ def display_batch_results():
 
 def comparative_analysis_interface():
     """Comparative analysis interface"""
-    st.header("📊 Comparative Analysis")
-    st.markdown("**Compare optimization strategies side-by-side**")
-
-    st.info("🚧 **Coming Soon:** Compare our model against traditional methods (HFC, BFC, URC) and generate publication-quality comparative analysis.")
-
-    # Placeholder for future implementation
-    col1, col2 = st.columns(2)
-    with col1:
-        st.subheader("Algorithm Comparison")
-        st.write("• ColiFormer (Our Model)")
-        st.write("• High Frequency Choice (HFC)")
-        st.write("• Background Frequency Choice (BFC)")
-        st.write("• Uniform Random Choice (URC)")
-
-    with col2:
-        st.subheader("Comparison Metrics")
-        st.write("• CAI Score Comparison")
-        st.write("• tAI Score Comparison")
-        st.write("• GC Content Analysis")
-        st.write("• Statistical Significance Testing")
+    st.header("Comparative Analysis")
+    st.markdown("For quantitative comparisons and plots, use the benchmark script:")
+    st.code("python scripts/run_benchmarks.py --config configs/benchmark.yaml")
 
 def advanced_settings_interface():
     """Advanced settings and configuration interface"""
-    st.header("⚙️ Advanced Settings")
+    st.header("Advanced Settings")
     st.markdown("**Configure advanced parameters and model settings**")
 
     # Model configuration
-    st.subheader("🤖 Model Configuration")
+    st.subheader("Model Configuration")
     col1, col2 = st.columns(2)
 
     with col1:
         st.write("**Current Model Status:**")
         if st.session_state.model:
             model_type = getattr(st.session_state, 'model_type', 'unknown')
-            st.success(f"✅ Model loaded: {model_type}")
+            st.success(f"Model loaded: {model_type}")
             st.write(f"Device: {st.session_state.device}")
         else:
-            st.warning("⚠️ Model not loaded")
+            st.warning("Model not loaded")
 
     with col2:
         st.write("**Model Information:**")
         st.write("• Architecture: BigBird Transformer")
         st.write("• Parameters: 89.6M")
-        st.write("• Training: 4,316 high-CAI E. coli genes")
-        st.write("• Performance: +5.1% CAI, +8.6% tAI")
+        st.write("• Fine-tuning data: 3,676 high-expression E. coli genes (NCBI-curated)")
 
     # Performance tuning
-    st.subheader("⚡ Performance Tuning")
+    st.subheader("Performance Tuning")
 
     # Memory management
     col1, col2 = st.columns(2)
     with col1:
-        if st.button("🧹 Clear Cache"):
+        if st.button("Clear Cache"):
             st.cache_data.clear()
             st.success("Cache cleared successfully")
 
     with col2:
-        if st.button("🔄 Reload Model"):
+        if st.button("Reload Model"):
             st.session_state.model = None
             st.session_state.tokenizer = None
             st.rerun()
 
     # System information
-    st.subheader("💻 System Information")
+    st.subheader("System Information")
     import torch
     col1, col2, col3 = st.columns(3)
 
@@ -1468,8 +1449,8 @@ def advanced_settings_interface():
 
     # Footer
     st.markdown("---")
-    st.markdown("**ColiFormer **")
-    st.markdown("🚀 Built for Nature Communications-level research • Targeting >20% CAI improvements • Aug 2025 experimental validation")
+    st.markdown("**ColiFormer**")
+    st.markdown("Open-source codon optimization for E. coli with reproducible evaluation.")
 
 if __name__ == "__main__":
     main()

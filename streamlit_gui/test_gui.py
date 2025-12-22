@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Test script for CodonTransformer Streamlit GUI
+Test script for ColiFormer Streamlit GUI
 
 This script tests the core functionality of the GUI without running the full Streamlit application.
 """
@@ -15,49 +15,49 @@ sys.path.append(str(Path(__file__).parent.parent))
 
 def test_imports():
     """Test if all required imports work"""
-    print("🧪 Testing imports...")
+    print("Testing imports...")
 
     try:
         import streamlit as st
-        print(f"  ✅ Streamlit: {st.__version__}")
+        print(f"  OK: Streamlit: {st.__version__}")
     except ImportError as e:
-        print(f"  ❌ Streamlit: {e}")
+        print(f"  FAIL: Streamlit: {e}")
         return False
 
     try:
         import torch
         device = "GPU" if torch.cuda.is_available() else "CPU"
-        print(f"  ✅ PyTorch: {torch.__version__} ({device})")
+        print(f"  OK: PyTorch: {torch.__version__} ({device})")
     except ImportError as e:
-        print(f"  ❌ PyTorch: {e}")
+        print(f"  FAIL: PyTorch: {e}")
         return False
 
     try:
         import plotly
-        print(f"  ✅ Plotly: {plotly.__version__}")
+        print(f"  OK: Plotly: {plotly.__version__}")
     except ImportError as e:
-        print(f"  ❌ Plotly: {e}")
+        print(f"  FAIL: Plotly: {e}")
         return False
 
     try:
         from CodonTransformer.CodonPrediction import predict_dna_sequence
-        print(f"  ✅ CodonTransformer.CodonPrediction")
+        print("  OK: CodonTransformer.CodonPrediction")
     except ImportError as e:
-        print(f"  ❌ CodonTransformer.CodonPrediction: {e}")
+        print(f"  FAIL: CodonTransformer.CodonPrediction: {e}")
         return False
 
     try:
         from CodonTransformer.CodonEvaluation import get_GC_content, calculate_tAI
-        print(f"  ✅ CodonTransformer.CodonEvaluation")
+        print("  OK: CodonTransformer.CodonEvaluation")
     except ImportError as e:
-        print(f"  ❌ CodonTransformer.CodonEvaluation: {e}")
+        print(f"  FAIL: CodonTransformer.CodonEvaluation: {e}")
         return False
 
     return True
 
 def test_protein_validation():
     """Test protein sequence validation"""
-    print("\n🧪 Testing protein sequence validation...")
+    print("\nTesting protein sequence validation...")
 
     try:
         # Import the validation function
@@ -77,18 +77,18 @@ def test_protein_validation():
 
         for seq, expected_valid, description in test_cases:
             is_valid, message = validate_protein_sequence(seq)
-            status = "✅" if is_valid == expected_valid else "❌"
+            status = "OK" if is_valid == expected_valid else "FAIL"
             print(f"  {status} {description}: {message}")
 
         return True
     except Exception as e:
-        print(f"  ❌ Error in validation test: {e}")
+        print(f"  FAIL: Error in validation test: {e}")
         traceback.print_exc()
         return False
 
 def test_metrics_calculation():
     """Test metrics calculation"""
-    print("\n🧪 Testing metrics calculation...")
+    print("\nTesting metrics calculation...")
 
     try:
         from app import calculate_input_metrics
@@ -102,33 +102,33 @@ def test_metrics_calculation():
         expected_keys = ['length', 'gc_content', 'baseline_dna', 'cai', 'tai']
         for key in expected_keys:
             if key in metrics:
-                print(f"  ✅ {key}: {metrics[key]}")
+                print(f"  OK: {key}: {metrics[key]}")
             else:
-                print(f"  ❌ Missing metric: {key}")
+                print(f"  FAIL: Missing metric: {key}")
                 return False
 
         # Validate metric values
         if metrics['length'] == len(test_protein):
-            print(f"  ✅ Length calculation correct")
+            print("  OK: Length calculation correct")
         else:
-            print(f"  ❌ Length calculation incorrect")
+            print("  FAIL: Length calculation incorrect")
             return False
 
         if 0 <= metrics['gc_content'] <= 100:
-            print(f"  ✅ GC content in valid range")
+            print("  OK: GC content in valid range")
         else:
-            print(f"  ❌ GC content out of range")
+            print("  FAIL: GC content out of range")
             return False
 
         return True
     except Exception as e:
-        print(f"  ❌ Error in metrics calculation: {e}")
+        print(f"  FAIL: Error in metrics calculation: {e}")
         traceback.print_exc()
         return False
 
 def test_visualization_functions():
     """Test visualization functions"""
-    print("\n🧪 Testing visualization functions...")
+    print("\nTesting visualization functions...")
 
     try:
         from app import create_gc_content_plot, create_metrics_comparison_chart
@@ -136,23 +136,23 @@ def test_visualization_functions():
         # Test GC content plot
         test_dna = "ATGGCGAAAGCGCTGTATCGCGAAAGCGCTGTATCGCGAAAGCGCTGTATCGC"
         fig = create_gc_content_plot(test_dna)
-        print(f"  ✅ GC content plot created")
+        print("  OK: GC content plot created")
 
         # Test metrics comparison chart
         before_metrics = {'gc_content': 50.0, 'cai': 0.5, 'tai': 0.3}
         after_metrics = {'gc_content': 52.0, 'cai': 0.6, 'tai': 0.4}
         fig = create_metrics_comparison_chart(before_metrics, after_metrics)
-        print(f"  ✅ Metrics comparison chart created")
+        print("  OK: Metrics comparison chart created")
 
         return True
     except Exception as e:
-        print(f"  ❌ Error in visualization test: {e}")
+        print(f"  FAIL: Error in visualization test: {e}")
         traceback.print_exc()
         return False
 
 def test_codon_evaluation():
     """Test CodonEvaluation functions directly"""
-    print("\n🧪 Testing CodonEvaluation functions...")
+    print("\nTesting CodonEvaluation functions...")
 
     try:
         from CodonTransformer.CodonEvaluation import get_GC_content, calculate_tAI, get_ecoli_tai_weights
@@ -160,25 +160,25 @@ def test_codon_evaluation():
         # Test GC content calculation
         test_dna = "ATGGCGAAAGCG"
         gc_content = get_GC_content(test_dna)
-        print(f"  ✅ GC content calculation: {gc_content:.1f}%")
+        print(f"  OK: GC content calculation: {gc_content:.1f}%")
 
         # Test tAI calculation
         try:
             tai_weights = get_ecoli_tai_weights()
             tai_value = calculate_tAI(test_dna, tai_weights)
-            print(f"  ✅ tAI calculation: {tai_value:.3f}")
+            print(f"  OK: tAI calculation: {tai_value:.3f}")
         except Exception as e:
-            print(f"  ⚠️  tAI calculation (may need scipy): {e}")
+            print(f"  NOTE: tAI calculation (may need scipy): {e}")
 
         return True
     except Exception as e:
-        print(f"  ❌ Error in CodonEvaluation test: {e}")
+        print(f"  FAIL: Error in CodonEvaluation test: {e}")
         traceback.print_exc()
         return False
 
 def test_model_loading():
     """Test model loading functionality"""
-    print("\n🧪 Testing model loading (mock)...")
+    print("\nTesting model loading (mock)...")
 
     try:
         import torch
@@ -186,35 +186,35 @@ def test_model_loading():
         from CodonTransformer.CodonPrediction import load_model
 
         # Test tokenizer loading (this is fast)
-        print("  📥 Testing tokenizer loading...")
+        print("  Testing tokenizer loading...")
         tokenizer = AutoTokenizer.from_pretrained("adibvafa/CodonTransformer")
-        print(f"  ✅ Tokenizer loaded successfully")
+        print("  OK: Tokenizer loaded successfully")
 
         # Test load_model function
-        print("  📥 Testing load_model function...")
+        print("  Testing load_model function...")
         from transformers import BigBirdForMaskedLM
-        print(f"  ✅ Model class available: BigBirdForMaskedLM")
+        print("  OK: Model class available: BigBirdForMaskedLM")
 
         # Check if fine-tuned model exists
         import os
         model_path = "models/alm-enhanced-training/balanced_alm_finetune.ckpt"
         if os.path.exists(model_path):
-            print(f"  ✅ Fine-tuned model found: {model_path}")
+            print(f"  OK: Fine-tuned model found: {model_path}")
         else:
-            print(f"  ⚠️  Fine-tuned model not found at: {model_path}")
+            print(f"  NOTE: Fine-tuned model not found at: {model_path}")
 
         # Note: We won't actually load the full model here as it's ~2GB
-        print("  ℹ️  Full model loading skipped in test (too large)")
+        print("  NOTE: Full model loading skipped in test (too large)")
 
         return True
     except Exception as e:
-        print(f"  ❌ Error in model loading test: {e}")
+        print(f"  FAIL: Error in model loading test: {e}")
         traceback.print_exc()
         return False
 
 def test_file_structure():
     """Test if all required files exist"""
-    print("\n🧪 Testing file structure...")
+    print("\nTesting file structure...")
 
     gui_dir = Path(__file__).parent
     parent_dir = gui_dir.parent
@@ -230,44 +230,44 @@ def test_file_structure():
     for file_name in required_files:
         file_path = gui_dir / file_name
         if file_path.exists():
-            print(f"  ✅ {file_name}")
+            print(f"  OK: {file_name}")
         else:
-            print(f"  ❌ {file_name} missing")
+            print(f"  FAIL: {file_name} missing")
             all_present = False
 
     # Check for model checkpoint
     model_path = parent_dir / "models" / "alm-enhanced-training" / "balanced_alm_finetune.ckpt"
     if model_path.exists():
-        print(f"  ✅ Fine-tuned model checkpoint found")
+        print("  OK: Fine-tuned model checkpoint found")
     else:
-        print(f"  ⚠️  Fine-tuned model checkpoint not found")
+        print("  NOTE: Fine-tuned model checkpoint not found")
 
     return all_present
 
 def test_post_processing():
     """Test post-processing functionality"""
-    print("\n🧪 Testing post-processing features...")
+    print("\nTesting post-processing features...")
 
     try:
         from app import POST_PROCESSING_AVAILABLE, DNACHISEL_AVAILABLE
 
         if POST_PROCESSING_AVAILABLE:
-            print("  ✅ Post-processing module available")
+            print("  OK: Post-processing module available")
             if DNACHISEL_AVAILABLE:
-                print("  ✅ DNAChisel available")
+                print("  OK: DNAChisel available")
             else:
-                print("  ⚠️  DNAChisel not available")
+                print("  NOTE: DNAChisel not available")
         else:
-            print("  ⚠️  Post-processing module not available")
+            print("  NOTE: Post-processing module not available")
 
         return True
     except Exception as e:
-        print(f"  ❌ Error in post-processing test: {e}")
+        print(f"  FAIL: Error in post-processing test: {e}")
         return False
 
 def main():
     """Run all tests"""
-    print("🚀 CodonTransformer GUI Test Suite")
+    print("ColiFormer GUI Test Suite")
     print("=" * 50)
 
     tests = [
@@ -289,25 +289,25 @@ def main():
             result = test_func()
             if result:
                 passed += 1
-                print(f"✅ {test_name}: PASSED")
+                print(f"OK: {test_name}: PASSED")
             else:
-                print(f"❌ {test_name}: FAILED")
+                print(f"FAIL: {test_name}: FAILED")
         except Exception as e:
-            print(f"❌ {test_name}: ERROR - {e}")
+            print(f"FAIL: {test_name}: ERROR - {e}")
 
     print("\n" + "=" * 50)
-    print(f"📊 Test Results: {passed}/{total} tests passed")
+    print(f"Test Results: {passed}/{total} tests passed")
 
     if passed == total:
-        print("🎉 All tests passed! The GUI should work correctly.")
+        print("All tests passed. The GUI should work correctly.")
         print("\nTo run the GUI:")
         print("  python run_gui.py")
         print("  or")
         print("  cd streamlit_gui && streamlit run app.py --server.address=0.0.0.0")
     else:
-        print("⚠️  Some tests failed. Please check the issues above.")
+        print("Some tests failed. Please check the issues above.")
 
-    print("\n🔧 New Features Added:")
+    print("\nNotes:")
     print("  • Fine-tuned model integration")
     print("  • Enhanced constrained beam search")
     print("  • Post-processing with DNAChisel")

@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 """
-Demo script for CodonTransformer Streamlit GUI
+Demo script for ColiFormer Streamlit GUI
 
 This script demonstrates the GUI functionality with example sequences
-and showcases the key features of the CodonTransformer optimization tool.
+and showcases key features of the ColiFormer optimization tool.
 """
 
 import sys
@@ -16,14 +16,14 @@ sys.path.append(str(Path(__file__).parent.parent))
 
 def print_header():
     """Print demo header"""
-    print("🧬" * 20)
-    print("  CodonTransformer GUI Demo")
-    print("🧬" * 20)
+    print("=" * 40)
+    print("  ColiFormer GUI Demo")
+    print("=" * 40)
     print()
 
 def print_section(title):
     """Print section header"""
-    print(f"\n📋 {title}")
+    print(f"\n{title}")
     print("-" * (len(title) + 4))
 
 def demo_validation():
@@ -44,7 +44,7 @@ def demo_validation():
 
     for seq, description in test_sequences:
         is_valid, message = validate_protein_sequence(seq)
-        status = "✅" if is_valid else "❌"
+        status = "OK" if is_valid else "FAIL"
         print(f"{status} {description}: {message}")
 
 def demo_metrics():
@@ -62,19 +62,19 @@ def demo_metrics():
     organism = "Escherichia coli general"
 
     for protein, description in example_proteins:
-        print(f"\n🧪 {description}")
+        print(f"\n{description}")
         print(f"   Sequence: {protein[:30]}{'...' if len(protein) > 30 else ''}")
 
         metrics = calculate_input_metrics(protein, organism)
 
-        print(f"   📏 Length: {metrics['length']} amino acids")
-        print(f"   🧬 GC Content: {metrics['gc_content']:.1f}%")
+        print(f"   Length: {metrics['length']} amino acids")
+        print(f"   GC Content: {metrics['gc_content']:.1f}%")
         if metrics['tai']:
-            print(f"   📊 tAI: {metrics['tai']:.3f}")
+            print(f"   tAI: {metrics['tai']:.3f}")
         if metrics['cai']:
-            print(f"   📊 CAI: {metrics['cai']:.3f}")
+            print(f"   CAI: {metrics['cai']:.3f}")
         else:
-            print(f"   📊 CAI: Not available for this organism")
+            print("   CAI: Not available for this organism")
 
 def demo_visualization():
     """Demonstrate visualization capabilities"""
@@ -85,15 +85,15 @@ def demo_visualization():
     # Test DNA sequence for GC content plot
     test_dna = "ATGGCGAAAGCGCTGTATCGCGAAAGCGCTGTATCGCGAAAGCGCTGTATCGCGAAAGCGCTGTATCGC"
 
-    print("🎨 Creating GC content sliding window plot...")
+    print("Creating GC content sliding window plot...")
     try:
         fig = create_gc_content_plot(test_dna)
-        print("   ✅ GC content plot created successfully")
-        print(f"   📊 Analyzing {len(test_dna)} base pairs")
+        print("   OK: GC content plot created successfully")
+        print(f"   Analyzing {len(test_dna)} base pairs")
     except Exception as e:
-        print(f"   ❌ Error creating GC plot: {e}")
+        print(f"   FAIL: Error creating GC plot: {e}")
 
-    print("\n🎨 Creating metrics comparison chart...")
+    print("\nCreating metrics comparison chart...")
     try:
         before_metrics = {
             'gc_content': 45.2,
@@ -106,10 +106,10 @@ def demo_visualization():
             'tai': 0.456
         }
         fig = create_metrics_comparison_chart(before_metrics, after_metrics)
-        print("   ✅ Comparison chart created successfully")
-        print("   📈 Shows improvement in all metrics")
+        print("   OK: Comparison chart created successfully")
+        print("   Shows improvement in all metrics")
     except Exception as e:
-        print(f"   ❌ Error creating comparison chart: {e}")
+        print(f"   FAIL: Error creating comparison chart: {e}")
 
 def demo_codon_evaluation():
     """Demonstrate CodonEvaluation functions"""
@@ -123,19 +123,19 @@ def demo_codon_evaluation():
         ("ATGGCGAAAGCGCTGTATCGCGAAAGCGCTGTATCGC", "Medium length"),
     ]
 
-    print("🧬 Testing GC content calculation:")
+    print("Testing GC content calculation:")
     for seq, description in test_sequences:
         gc_content = get_GC_content(seq)
         print(f"   {description}: {gc_content:.1f}%")
 
-    print("\n🧬 Testing tAI calculation:")
+    print("\nTesting tAI calculation:")
     try:
         tai_weights = get_ecoli_tai_weights()
         for seq, description in test_sequences:
             tai_value = calculate_tAI(seq, tai_weights)
             print(f"   {description}: {tai_value:.3f}")
     except Exception as e:
-        print(f"   ❌ tAI calculation error: {e}")
+        print(f"   FAIL: tAI calculation error: {e}")
 
 def demo_model_info():
     """Show model information"""
@@ -145,39 +145,39 @@ def demo_model_info():
         import torch
         from transformers import AutoTokenizer
 
-        print("🤖 Model Details:")
-        print("   📦 Model: adibvafa/CodonTransformer")
-        print("   🏗️  Architecture: BigBird Transformer")
-        print("   📊 Task: Masked Language Modeling for codon optimization")
+        print("Model Details:")
+        print("   Base model: adibvafa/CodonTransformer")
+        print("   Architecture: BigBird Transformer")
+        print("   Task: Masked Language Modeling for codon optimization")
 
-        print(f"\n💻 System Information:")
-        print(f"   🔧 PyTorch: {torch.__version__}")
-        print(f"   🎯 Device: {'GPU (CUDA)' if torch.cuda.is_available() else 'CPU'}")
+        print("\nSystem Information:")
+        print(f"   PyTorch: {torch.__version__}")
+        print(f"   Device: {'GPU (CUDA)' if torch.cuda.is_available() else 'CPU'}")
         if torch.cuda.is_available():
-            print(f"   🎮 GPU: {torch.cuda.get_device_name(0)}")
-            print(f"   💾 GPU Memory: {torch.cuda.get_device_properties(0).total_memory / 1e9:.1f}GB")
+            print(f"   GPU: {torch.cuda.get_device_name(0)}")
+            print(f"   GPU Memory: {torch.cuda.get_device_properties(0).total_memory / 1e9:.1f}GB")
 
-        print(f"\n🔤 Tokenizer Test:")
+        print("\nTokenizer Test:")
         tokenizer = AutoTokenizer.from_pretrained("adibvafa/CodonTransformer")
-        print(f"   ✅ Tokenizer loaded: {len(tokenizer)} tokens")
-        print(f"   📝 Vocab size: {tokenizer.vocab_size}")
+        print(f"   OK: Tokenizer loaded: {len(tokenizer)} tokens")
+        print(f"   Vocab size: {tokenizer.vocab_size}")
 
     except Exception as e:
-        print(f"   ❌ Error loading model info: {e}")
+        print(f"   FAIL: Error loading model info: {e}")
 
 def demo_gui_features():
     """Show GUI features overview"""
     print_section("GUI Features Overview")
 
     features = [
-        ("🔍 Real-time Validation", "Instant feedback on protein sequence validity"),
-        ("📊 Metrics Dashboard", "GC content, CAI, tAI calculations"),
-        ("🎯 Constrained Optimization", "GC content control with beam search"),
-        ("📈 Visual Analytics", "Interactive plots and comparisons"),
-        ("⚙️ Configurable Parameters", "Organism selection, beam size, GC targets"),
-        ("💾 Export Options", "Download optimized sequences"),
-        ("🔄 Progress Tracking", "Real-time optimization progress"),
-        ("📱 Responsive Design", "Works on desktop and mobile"),
+        ("Real-time Validation", "Instant feedback on protein sequence validity"),
+        ("Metrics Dashboard", "GC content, CAI, tAI calculations"),
+        ("Constrained Optimization", "GC content control with beam search"),
+        ("Visual Analytics", "Interactive plots and comparisons"),
+        ("Configurable Parameters", "Organism selection, beam size, GC targets"),
+        ("Export Options", "Download optimized sequences"),
+        ("Progress Tracking", "Real-time optimization progress"),
+        ("Responsive Design", "Works on desktop and mobile"),
     ]
 
     for feature, description in features:
@@ -215,7 +215,7 @@ def demo_usage_examples():
     ]
 
     for i, example in enumerate(examples, 1):
-        print(f"\n🧪 Example {i}: {example['name']}")
+        print(f"\nExample {i}: {example['name']}")
         print(f"   Protein: {example['protein'][:40]}{'...' if len(example['protein']) > 40 else ''}")
         print(f"   Organism: {example['organism']}")
         print(f"   Use case: {example['use_case']}")
@@ -225,7 +225,7 @@ def demo_launch_instructions():
     """Show how to launch the GUI"""
     print_section("How to Launch the GUI")
 
-    print("🚀 Launch Options:")
+    print("Launch Options:")
     print()
     print("   Option 1 - Using the launcher script:")
     print("   $ cd ecoli/streamlit_gui")
@@ -239,11 +239,11 @@ def demo_launch_instructions():
     print("   Option 3 - With custom port:")
     print("   $ streamlit run app.py --server.port 8502")
     print()
-    print("📱 Access the GUI:")
-    print("   🌐 Web browser: http://localhost:8501")
-    print("   📋 The GUI will automatically open in your default browser")
+    print("Access the GUI:")
+    print("   Web browser: http://localhost:8501")
+    print("   The GUI will automatically open in your default browser")
     print()
-    print("⚡ Performance Tips:")
+    print("Performance Tips:")
     print("   • Use GPU if available for faster processing")
     print("   • Start with shorter sequences for testing")
     print("   • Adjust beam size based on sequence length")
@@ -253,8 +253,8 @@ def main():
     """Run the complete demo"""
     print_header()
 
-    print("This demo showcases the CodonTransformer Streamlit GUI capabilities.")
-    print("The GUI provides an intuitive interface for protein codon optimization.")
+    print("This demo showcases the ColiFormer Streamlit GUI capabilities.")
+    print("The GUI provides an interface for protein codon optimization.")
     print()
 
     try:
@@ -267,7 +267,7 @@ def main():
         demo_usage_examples()
         demo_launch_instructions()
 
-        print("\n🎉 Demo completed successfully!")
+        print("\nDemo completed successfully.")
         print()
         print("Next steps:")
         print("1. Launch the GUI using one of the methods above")
@@ -275,10 +275,10 @@ def main():
         print("3. Experiment with different organisms and settings")
         print("4. Compare optimization results")
         print()
-        print("Happy optimizing! 🧬✨")
+        print("Happy optimizing.")
 
     except Exception as e:
-        print(f"\n❌ Demo error: {e}")
+        print(f"\nDemo error: {e}")
         print("Make sure you're running from the correct directory and all dependencies are installed.")
         return 1
 
