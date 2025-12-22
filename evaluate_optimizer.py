@@ -2,7 +2,7 @@ import sys
 """
 File: evaluate_optimizer.py
 ---------------------------
-Evaluate the CodonTransformer model with enhanced capabilities:
+Evaluate ColiFormer with enhanced capabilities:
 1) DNAChisel post-processing for sequence polishing
 2) Optional multi-objective generation (Pareto-style filtering)
 3) Enhanced beam search with multiple candidates

@@ -1,8 +1,9 @@
 """
 File: pretrain.py
 -----------------
-Pretrain the CodonTransformer model on JSON datasets prepared via
-CodonData.prepare_training_data. See README for setup and usage.
+Pretrain the base transformer model on JSON datasets prepared via
+CodonData.prepare_training_data. This is typically not needed for ColiFormer
+as we use the pretrained CodonTransformer base. See README for setup and usage.
 """
 
 import argparse
@@ -121,7 +122,7 @@ class EpochCheckpoint(pl.Callback):
 
 
 def main(args):
-    """Pretrain the CodonTransformer model."""
+    """Pretrain the base transformer model."""
     pl.seed_everything(args.seed)
     torch.set_float32_matmul_precision("medium")
 
@@ -171,7 +172,7 @@ def main(args):
 
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description="Pretrain the CodonTransformer model.")
+    parser = argparse.ArgumentParser(description="Pretrain the base transformer model.")
     parser.add_argument(
         "--tokenizer_path",
         type=str,

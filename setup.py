@@ -17,20 +17,20 @@ def read_readme():
 
 
 setup(
-    name="CodonTransformer",
-    version="1.6.7",
+    name="ColiFormer",
+    version="1.0.0",
     packages=find_packages(),
     install_requires=read_requirements(),
     author="Adibvafa Fallahpour",
     author_email="Adibvafa.fallahpour@mail.utoronto.ca",
     description=(
-        "The ultimate tool for codon optimization, "
-        "transforming protein sequences into optimized DNA sequences "
-        "specific for your target organisms."
+        "Transformer-based codon optimization for E. coli using "
+        "deep learning with Augmented-Lagrangian GC control. "
+        "Built on CodonTransformer for E. coli-specific optimization."
     ),
     long_description=read_readme(),
     long_description_content_type="text/markdown",
-    url="https://github.com/adibvafa/CodonTransformer",
+    url="https://github.com/SAKETH11111/ColiFormer",
     classifiers=[
         "Programming Language :: Python :: 3",
         "License :: OSI Approved :: Apache Software License",

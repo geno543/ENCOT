@@ -1,0 +1,53 @@
+# ColiFormer ALM Training Configuration
+# This configuration reproduces the main training setup from the paper
+# using the Augmented-Lagrangian Method (ALM) for GC content control.
+
+model:
+  base_model: "adibvafa/CodonTransformer-base"
+  tokenizer: "adibvafa/CodonTransformer"
+
+data:
+  dataset_dir: "data"
+  # Expected files: finetune_set.json (created by preprocess_data.py)
+
+training:
+  batch_size: 6
+  max_epochs: 15
+  learning_rate: 5e-5
+  warmup_fraction: 0.1
+  num_workers: 5
+  accumulate_grad_batches: 1
+  num_gpus: 4
+  save_every_n_steps: 512
+  seed: 123
+  log_every_n_steps: 20
+
+checkpoint:
+  checkpoint_dir: "models/alm-enhanced-training"
+  checkpoint_filename: "balanced_alm_finetune.ckpt"
+
+# Augmented-Lagrangian Method (ALM) for GC content control
+alm:
+  enabled: true
+  gc_target: 0.52  # Target GC content for E. coli (52%)
+  curriculum_epochs: 3  # Warm-up epochs before enforcing GC constraint
+  
+  # ALM penalty parameters
+  initial_penalty_factor: 20.0
+  penalty_update_factor: 10.0
+  max_penalty: 1e6
+  min_penalty: 1e-6
+  
+  # ALM tolerance parameters
+  tolerance: 1e-5  # Primal tolerance
+  dual_tolerance: 1e-5  # Dual tolerance for constraint violation
+  tolerance_update_factor: 0.1
+  
+  # Adaptive penalty adjustment
+  rel_penalty_increase_threshold: 0.1
+
+# Legacy penalty method (if ALM disabled)
+gc_penalty:
+  weight: 0.0  # Only used if use_lagrangian=false
+
+

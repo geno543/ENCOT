@@ -1,0 +1,36 @@
+# ColiFormer Quick Training Configuration
+# This is a minimal configuration for quick sanity checks and testing.
+# Use this to verify your setup before running full training.
+
+model:
+  base_model: "adibvafa/CodonTransformer-base"
+  tokenizer: "adibvafa/CodonTransformer"
+
+data:
+  dataset_dir: "data"
+
+training:
+  batch_size: 2
+  max_epochs: 1
+  learning_rate: 5e-5
+  warmup_fraction: 0.1
+  num_workers: 0  # Disable multiprocessing for debugging
+  accumulate_grad_batches: 1
+  num_gpus: 0  # CPU-only for quick testing
+  save_every_n_steps: 10
+  seed: 123
+  log_every_n_steps: 5
+
+checkpoint:
+  checkpoint_dir: "models/test-training"
+  checkpoint_filename: "quick_test.ckpt"
+
+alm:
+  enabled: false  # Disable ALM for quick test
+  gc_target: 0.52
+  curriculum_epochs: 0
+
+gc_penalty:
+  weight: 0.0
+
+

@@ -1,12 +1,12 @@
 [tool.poetry]
-name = "CodonTransformer"
-version = "1.6.7"
-description = "The ultimate tool for codon optimization, transforming protein sequences into optimized DNA sequences specific for your target organisms."
+name = "ColiFormer"
+version = "1.0.0"
+description = "Transformer-based codon optimization for E. coli using deep learning with Augmented-Lagrangian GC control."
 authors = ["Adibvafa Fallahpour <Adibvafa.fallahpour@mail.utoronto.ca>"]
 license = "Apache-2.0"
 readme = "README.md"
-homepage = "https://github.com/adibvafa/CodonTransformer"
-repository = "https://github.com/adibvafa/CodonTransformer"
+homepage = "https://github.com/SAKETH11111/ColiFormer"
+repository = "https://github.com/SAKETH11111/ColiFormer"
 classifiers = [
     "Programming Language :: Python :: 3",
     "License :: OSI Approved :: Apache Software License",

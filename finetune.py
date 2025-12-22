@@ -1,9 +1,9 @@
 """
 File: finetune.py
 ------------------
-Finetune the CodonTransformer model on JSON datasets prepared via
-CodonData.prepare_training_data. The pretrained base is loaded from
-Hugging Face. See README for usage details.
+Fine-tune ColiFormer (based on CodonTransformer) on E. coli JSON datasets 
+prepared via CodonData.prepare_training_data. The pretrained base model is 
+loaded from Hugging Face. See README for usage details.
 """
 
 import argparse
@@ -74,6 +74,41 @@ class MaskedTokenizerCollator:
 
 
 class plTrainHarness(pl.LightningModule):
+    """
+    PyTorch Lightning training harness for ColiFormer with Augmented-Lagrangian Method (ALM) GC control.
+    
+    This class implements the training loop for fine-tuning CodonTransformer on E. coli sequences
+    with precise GC content control using an Augmented-Lagrangian Method. The ALM approach allows
+    the model to learn codon preferences while maintaining GC content within a target range (e.g., 52%).
+    
+    Key features:
+    - Masked language modeling (MLM) loss for codon prediction
+    - ALM-based GC content constraint enforcement
+    - Curriculum learning: warm-up epochs before enforcing GC constraints
+    - Adaptive penalty coefficient (rho) adjustment based on constraint violation progress
+    
+    The ALM method minimizes: L = L_MLM + λ·(GC - μ) + (ρ/2)(GC - μ)²
+    where λ is the Lagrangian multiplier and ρ is the penalty coefficient.
+    
+    Args:
+        model: BigBirdForMaskedLM model to train
+        learning_rate: Learning rate for optimizer
+        warmup_fraction: Fraction of training steps for warmup
+        gc_penalty_weight: Weight for simple GC penalty (legacy, unused if ALM enabled)
+        tokenizer: Tokenizer for the model
+        gc_target: Target GC content (default: 0.52 for E. coli)
+        use_lagrangian: Enable ALM method (default: False)
+        lagrangian_rho: Initial penalty coefficient for ALM (default: 10.0)
+        curriculum_epochs: Number of warm-up epochs before enforcing GC constraint (default: 3)
+        alm_tolerance: Primal tolerance for ALM convergence (default: 1e-5)
+        alm_dual_tolerance: Dual tolerance for constraint violation (default: 1e-5)
+        alm_penalty_update_factor: Factor for updating penalty coefficient (default: 10.0)
+        alm_initial_penalty_factor: Initial penalty coefficient (default: 20.0)
+        alm_tolerance_update_factor: Factor for updating tolerance (default: 0.1)
+        alm_rel_penalty_increase_threshold: Relative improvement threshold for penalty updates (default: 0.1)
+        alm_max_penalty: Maximum penalty value to prevent ill-conditioning (default: 1e6)
+        alm_min_penalty: Minimum penalty value (default: 1e-6)
+    """
     def __init__(self, model, learning_rate, warmup_fraction, gc_penalty_weight, tokenizer, 
                  gc_target=0.52, use_lagrangian=False, lagrangian_rho=10.0, curriculum_epochs=3,
                  alm_tolerance=1e-5, alm_dual_tolerance=1e-5, alm_penalty_update_factor=10.0,
@@ -169,6 +204,26 @@ class plTrainHarness(pl.LightningModule):
         return [optimizer], [lr_scheduler]
 
     def training_step(self, batch, batch_idx):
+        """
+        Training step with ALM-based GC content control.
+        
+        This method implements the core training loop:
+        1. Forward pass through the model to get MLM loss
+        2. Calculate expected GC content from predicted codon probabilities
+        3. Apply ALM constraint if enabled (after curriculum warm-up)
+        4. Update Lagrangian multiplier and penalty coefficient adaptively
+        
+        The ALM loss combines:
+        - MLM loss: standard masked language modeling loss
+        - GC constraint: λ·(GC - μ) + (ρ/2)(GC - μ)²
+        
+        Args:
+            batch: Batch of tokenized sequences with labels
+            batch_idx: Batch index
+            
+        Returns:
+            Total loss (MLM + GC constraint)
+        """
         # Forward pass
         outputs = self.model(**batch)
         mlm_loss = outputs.loss
@@ -523,7 +578,7 @@ def main(args):
 
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description="Finetune the CodonTransformer model.")
+    parser = argparse.ArgumentParser(description="Fine-tune ColiFormer for E. coli codon optimization.")
     parser.add_argument(
         "--dataset_dir",
         type=str,

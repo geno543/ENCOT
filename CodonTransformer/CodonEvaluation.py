@@ -76,11 +76,19 @@ def get_GC_content(dna: str) -> float:
     """
     Calculate the GC content of a DNA sequence.
 
+    GC content is the percentage of nucleotides that are either G (guanine) or C (cytosine).
+    This metric is important for codon optimization as it affects expression levels and
+    synthesis efficiency in E. coli.
+
     Args:
-        dna (str): The DNA sequence.
+        dna (str): The DNA sequence (uppercase or lowercase).
 
     Returns:
-        float: The GC content as a percentage.
+        float: The GC content as a percentage (0-100).
+
+    Example:
+        >>> get_GC_content("ATGCGATCG")
+        55.56  # 5 GC nucleotides out of 9 total
     """
     dna = dna.upper()
     if not dna:
