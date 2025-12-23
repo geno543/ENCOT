@@ -1,8 +1,5 @@
 # ColiFormer: A Transformer-Based Codon Optimization Model Balancing Multiple Objectives for Enhanced E. coli Gene Expression
 
-<p align="center">
-  <img src="src/banner_final.png" alt="ColiFormer Logo" width="100%" height="100%" style="vertical-align: middle;"/>
-</p>
 
 <p align="center">
   <a href="https://huggingface.co/saketh11/ColiFormer"><img src="https://img.shields.io/badge/HuggingFace-Model-FFBF00?style=for-the-badge&logo=huggingface&logoColor=white" alt="HuggingFace Model"></a>
