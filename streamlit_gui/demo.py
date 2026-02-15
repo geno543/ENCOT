@@ -253,7 +253,7 @@ def main():
     """Run the complete demo"""
     print_header()
 
-    print("This demo showcases the ColiFormer Streamlit GUI capabilities.")
+    print("This demo showcases the ENCOT Streamlit GUI capabilities.")
     print("The GUI provides an interface for protein codon optimization.")
     print()
 

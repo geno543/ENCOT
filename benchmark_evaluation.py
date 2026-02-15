@@ -1,7 +1,7 @@
 """
 File: benchmark_evaluation.py
 ------------------------------
-Benchmark E. coli protein sequences with ColiFormer, generate optimized DNA,
+Benchmark E. coli protein sequences with ENCOT, generate optimized DNA,
 compute metrics (CAI, tAI, GC, CFD, cis-elements), and produce summary tables
 and figures.
 """
@@ -425,7 +425,7 @@ def generate_visualizations(results_df: pd.DataFrame, output_dir: str):
 
         ax.set_xlabel('Sequence Index', fontsize=12)
         ax.set_ylabel('CAI Score', fontsize=12)
-        ax.set_title('ColiFormer: CAI Before and After Optimization', fontsize=14, fontweight='bold')
+        ax.set_title('ENCOT: CAI Before and After Optimization', fontsize=14, fontweight='bold')
         ax.set_xticks(x[::5])  # Show every 5th label
         ax.set_xticklabels(x[::5])
         ax.legend()
@@ -457,7 +457,7 @@ def generate_visualizations(results_df: pd.DataFrame, output_dir: str):
 
         bars = plt.bar(categories, medians, color=colors, alpha=0.8, width=0.6)
         plt.ylabel('Median CAI Score', fontsize=12)
-        plt.title('ColiFormer: Median CAI Before and After Optimization', fontsize=14, fontweight='bold')
+        plt.title('ENCOT: Median CAI Before and After Optimization', fontsize=14, fontweight='bold')
         plt.ylim(0, max(medians) * 1.2)
 
         for bar, median in zip(bars, medians):
@@ -567,7 +567,7 @@ def generate_visualizations(results_df: pd.DataFrame, output_dir: str):
             axes[idx].axvline(mean_val, color='red', linestyle='--', linewidth=2, label=f'Mean: {mean_val:.3f}')
             axes[idx].legend()
     
-    plt.suptitle('ColiFormer: Optimization Metrics Distribution', fontsize=14, fontweight='bold', y=1.02)
+    plt.suptitle('ENCOT: Optimization Metrics Distribution', fontsize=14, fontweight='bold', y=1.02)
     plt.tight_layout()
     plt.savefig(os.path.join(fig_dir, 'metrics_distribution.png'), dpi=300, bbox_inches='tight')
     plt.close()
@@ -578,8 +578,8 @@ def generate_visualizations(results_df: pd.DataFrame, output_dir: str):
 
 
 def main():
-    """CLI entrypoint to run the ColiFormer benchmark workflow."""
-    parser = argparse.ArgumentParser(description="Benchmark ColiFormer on E. coli sequences")
+    """CLI entrypoint to run the ENCOT benchmark workflow."""
+    parser = argparse.ArgumentParser(description="Benchmark ENCOT on E. coli sequences")
     parser.add_argument("--excel_path", type=str, default="Benchmark 80 sequences.xlsx",
                         help="Path to benchmark Excel file")
     parser.add_argument("--checkpoint_path", type=str, default="models/ecoli-codon-optimizer/finetune_best.ckpt",
@@ -600,7 +600,7 @@ def main():
     os.makedirs(output_dir, exist_ok=True)
     
     print("="*60)
-    print("COLIFORMER BENCHMARK EVALUATION")
+    print("ENCOT BENCHMARK EVALUATION")
     print("="*60)
     
     device = torch.device("cuda" if torch.cuda.is_available() and args.use_gpu else "cpu")
@@ -615,7 +615,7 @@ def main():
     )
     print(f"Loaded {len(sequences)} sequences")
     
-    print("\nLoading ColiFormer model...")
+    print("\nLoading ENCOT model...")
     model = load_model(model_path=args.checkpoint_path, device=device)
     tokenizer = AutoTokenizer.from_pretrained("adibvafa/CodonTransformer")
     print("Model loaded successfully")

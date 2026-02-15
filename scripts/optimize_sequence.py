@@ -202,7 +202,7 @@ def load_reference_data(ref_sequences_path: str = None):
 def main():
     """Main entry point for sequence optimization."""
     parser = argparse.ArgumentParser(
-        description="Optimize protein sequences using ColiFormer",
+        description="Optimize protein sequences using ENCOT",
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="""
 Examples:

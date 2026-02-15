@@ -17,7 +17,7 @@ def read_readme():
 
 
 setup(
-    name="ColiFormer",
+    name="ENCOT",
     version="1.0.0",
     packages=find_packages(),
     install_requires=read_requirements(),
@@ -30,7 +30,7 @@ setup(
     ),
     long_description=read_readme(),
     long_description_content_type="text/markdown",
-    url="https://github.com/SAKETH11111/ColiFormer",
+    url="https://github.com/geno543/ENCOT",
     classifiers=[
         "Programming Language :: Python :: 3",
         "License :: OSI Approved :: Apache Software License",

@@ -134,7 +134,7 @@ def validate_config(config: dict):
 def main():
     """Main entry point for training."""
     parser = argparse.ArgumentParser(
-        description="Train ColiFormer model with configuration file",
+        description="Train ENCOT model with configuration file",
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="""
 Examples:

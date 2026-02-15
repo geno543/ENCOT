@@ -1,4 +1,4 @@
-# ColiFormer: A Transformer-Based Codon Optimization Model Balancing Multiple Objectives for Enhanced E. coli Gene Expression
+# ENCOT: A Transformer-Based Codon Optimization Model Balancing Multiple Objectives for Enhanced E. coli Gene Expression
 
 
 <p align="center">
@@ -8,13 +8,13 @@
 
 ## Abstract
 
-ColiFormer is a transformer-based model for codon optimization of protein sequences in *Escherichia coli*. Built on top of CodonTransformer (a multi-species BigBird model trained on over 1 million DNA–protein pairs), ColiFormer is fine-tuned specifically for E. coli codon preferences using 3,676 high-expression E. coli genes curated from NCBI.
+ENCOT is a transformer-based model for codon optimization of protein sequences in *Escherichia coli*. Built on top of CodonTransformer (a multi-species BigBird model trained on over 1 million DNA–protein pairs), ENCOT is fine-tuned specifically for E. coli codon preferences using 3,676 high-expression E. coli genes curated from NCBI.
 
-ColiFormer balances multiple objectives (CAI, GC content, tAI, RNA stability, and minimization of negative cis-regulatory elements) and uses an **Augmented-Lagrangian Method (ALM)** to enforce GC content control during training. Performance was evaluated on 37,053 native E. coli genes and 80 recombinant protein targets, demonstrating strong improvements in in silico expression metrics while maintaining biologically appropriate constraints.
+ENCOT balances multiple objectives (CAI, GC content, tAI, RNA stability, and minimization of negative cis-regulatory elements) and uses an **Augmented-Lagrangian Method (ALM)** to enforce GC content control during training. Performance was evaluated on 37,053 native E. coli genes and 80 recombinant protein targets, demonstrating strong improvements in in silico expression metrics while maintaining biologically appropriate constraints.
 
 ## Paper Reference
 
-**ColiFormer: A Transformer-Based Codon Optimization Model Balancing Multiple Objectives for Enhanced E. coli Gene Expression**
+**ENCOT: A Transformer-Based Codon Optimization Model Balancing Multiple Objectives for Enhanced E. coli Gene Expression**
 
 Saketh Baddam, Omar Emam, Abdelrahman Elfikky, Francesco Cavarretta, George Luka, Ibrahim Farag, Yasser Sanad
 
@@ -24,11 +24,11 @@ bioRxiv preprint (not peer-reviewed): `https://doi.org/10.1101/2025.11.26.690826
 
 ### Citation
 
-If you use ColiFormer in your research, please cite:
+If you use ENCOT in your research, please cite:
 
 ```bibtex
-@article{coliformer2025,
-  title={ColiFormer: A Transformer-Based Codon Optimization Model Balancing Multiple Objectives for Enhanced E. coli Gene Expression},
+@article{encot2025,
+  title{ENCOT: A Transformer-Based Codon Optimization Model Balancing Multiple Objectives for Enhanced E. coli Gene Expression},
   author={Baddam, Saketh and Emam, Omar and Elfikky, Abdelrahman and Cavarretta, Francesco and Luka, George and Farag, Ibrahim and Sanad, Yasser},
   journal={bioRxiv},
   year={2025},
@@ -93,8 +93,8 @@ python scripts/optimize_sequence.py \
 1. **Clone the repository:**
 
 ```bash
-git clone https://github.com/SAKETH11111/ColiFormer.git
-cd ColiFormer
+git clone https://github.com/geno543/ENCOT.git
+cd ENCOT
 ```
 
 2. **Create a virtual environment:**
@@ -157,7 +157,7 @@ The complete dataset is available at [saketh11/ColiFormer-Data](https://huggingf
 
 ### Quick Start Training
 
-Train ColiFormer with the default ALM configuration:
+Train ENCOT with the default ALM configuration:
 
 ```bash
 python scripts/train.py --config configs/train_ecoli_alm.yaml
@@ -304,7 +304,7 @@ python scripts/run_benchmarks.py --config configs/benchmark.yaml
 ```
 
 This will:
-- Load the fine-tuned ColiFormer model
+- Load the fine-tuned ENCOT model
 - Optimize all sequences in the benchmark file
 - Calculate metrics (CAI, tAI, GC content, CFD, negative cis-elements)
 - Generate comparison plots and summary statistics
@@ -332,7 +332,7 @@ python scripts/run_benchmarks.py \
 
 ### Base Model
 
-ColiFormer is built on CodonTransformer, a BigBird transformer model:
+ENCOT is built on CodonTransformer, a BigBird transformer model:
 - **Architecture**: BigBirdForMaskedLM (89.6M parameters)
 - **Pre-training**: 1M+ DNA-protein pairs from 164 organisms
 - **Context length**: 2048 tokens
@@ -340,7 +340,7 @@ ColiFormer is built on CodonTransformer, a BigBird transformer model:
 
 ### Fine-tuning
 
-ColiFormer is fine-tuned on E. coli-specific data:
+ENCOT is fine-tuned on E. coli-specific data:
 - **Training data**: 4,300 high-CAI E. coli sequences
 - **Loss function**: Masked Language Modeling (MLM) + GC constraint
 - **Optimizer**: AdamW with CosineAnnealingWarmRestarts scheduler
@@ -371,7 +371,7 @@ This approach allows the model to learn codon preferences while maintaining prec
 
 ## Evaluation Metrics
 
-ColiFormer computes comprehensive metrics for optimized sequences:
+ENCOT computes comprehensive metrics for optimized sequences:
 
 - **CAI (Codon Adaptation Index)**: Measures similarity to highly expressed genes (0-1, higher is better)
 - **tAI (tRNA Adaptation Index)**: Measures tRNA availability (0-1, higher is better)
@@ -383,7 +383,7 @@ ColiFormer computes comprehensive metrics for optimized sequences:
 ## Project Structure
 
 ```
-coliformer/
+encot/
 ├── configs/                    # YAML configuration files
 │   ├── train_ecoli_alm.yaml   # Main training config
 │   ├── train_ecoli_quick.yaml # Quick test config
@@ -448,11 +448,11 @@ This project is licensed under the Apache License 2.0 - see the [LICENSE](LICENS
 
 ## Citation
 
-If you use ColiFormer in your research, please cite:
+If you use ENCOT in your research, please cite:
 
 ```bibtex
-@article{coliformer2025,
-  title={ColiFormer: A Transformer-Based Codon Optimization Model Balancing Multiple Objectives for Enhanced E. coli Gene Expression},
+@article{encot2025,
+  title={ENCOT: A Transformer-Based Codon Optimization Model Balancing Multiple Objectives for Enhanced E. coli Gene Expression},
   author={Baddam, Saketh and Emam, Omar and Elfikky, Abdelrahman and Cavarretta, Francesco and Luka, George and Farag, Ibrahim and Sanad, Yasser},
   journal={bioRxiv},
   year={2025},
@@ -464,4 +464,4 @@ If you use ColiFormer in your research, please cite:
 
 ---
 
-**ColiFormer** - State-of-the-art codon optimization for E. coli expression systems.
+**ENCOT** - State-of-the-art codon optimization for E. coli expression systems.

@@ -111,7 +111,7 @@ def validate_config(config: dict):
 def main():
     """Main entry point for benchmark evaluation."""
     parser = argparse.ArgumentParser(
-        description="Run benchmark evaluation for ColiFormer",
+        description="Run benchmark evaluation for ENCOT",
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="""
 Examples:

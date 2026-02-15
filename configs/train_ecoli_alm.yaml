@@ -1,4 +1,4 @@
-# ColiFormer ALM Training Configuration
+# ENCOT ALM Training Configuration
 # This configuration reproduces the main training setup from the paper
 # using the Augmented-Lagrangian Method (ALM) for GC content control.
 

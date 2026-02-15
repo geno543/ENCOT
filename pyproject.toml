@@ -1,12 +1,12 @@
 [tool.poetry]
-name = "ColiFormer"
+name = "ENCOT"
 version = "1.0.0"
 description = "Transformer-based codon optimization for E. coli using deep learning with Augmented-Lagrangian GC control."
 authors = ["Adibvafa Fallahpour <Adibvafa.fallahpour@mail.utoronto.ca>"]
 license = "Apache-2.0"
 readme = "README.md"
-homepage = "https://github.com/SAKETH11111/ColiFormer"
-repository = "https://github.com/SAKETH11111/ColiFormer"
+homepage = "https://github.com/geno543/ENCOT"
+repository = "https://github.com/geno543/ENCOT"
 classifiers = [
     "Programming Language :: Python :: 3",
     "License :: OSI Approved :: Apache Software License",

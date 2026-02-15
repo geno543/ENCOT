@@ -1,7 +1,7 @@
 """
 File: app.py
 -------------
-Streamlit GUI for ColiFormer. Provides sequence validation, optimization,
+Streamlit GUI for ENCOT. Provides sequence validation, optimization,
 and visualization for E. coli-focused workflows with optional post-processing.
 """
 
@@ -51,7 +51,7 @@ except ImportError:
     DNACHISEL_AVAILABLE = False
 
 st.set_page_config(
-    page_title="ColiFormer GUI",
+    page_title="ENCOT GUI",
     layout="wide",
     initial_sidebar_state="expanded"
 )
@@ -625,7 +625,7 @@ def run_optimization(protein: str, organism: str, use_post_processing: bool = Fa
         st.session_state.optimization_running = False
 
 def main():
-    st.title("ColiFormer")
+    st.title("ENCOT")
     st.markdown("E. coli codon optimization with constraint-aware decoding and in silico evaluation metrics.")
 
     # Remove the performance highlights expander (details/summary block)
@@ -1449,7 +1449,7 @@ def advanced_settings_interface():
 
     # Footer
     st.markdown("---")
-    st.markdown("**ColiFormer**")
+    st.markdown("**ENCOT**")
     st.markdown("Open-source codon optimization for E. coli with reproducible evaluation.")
 
 if __name__ == "__main__":

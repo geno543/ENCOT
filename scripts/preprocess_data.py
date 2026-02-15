@@ -163,7 +163,7 @@ def create_train_test_splits(processed_csv: str, output_dir: str = "data", test_
 def main():
     """Main entry point for data preprocessing."""
     parser = argparse.ArgumentParser(
-        description="Preprocess E. coli gene data for ColiFormer training",
+        description="Preprocess E. coli gene data for ENCOT training",
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="""
 Examples:

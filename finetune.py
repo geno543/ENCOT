@@ -1,7 +1,7 @@
 """
 File: finetune.py
 ------------------
-Fine-tune ColiFormer (based on CodonTransformer) on E. coli JSON datasets 
+Fine-tune ENCOT (based on CodonTransformer) on E. coli JSON datasets 
 prepared via CodonData.prepare_training_data. The pretrained base model is 
 loaded from Hugging Face. See README for usage details.
 """

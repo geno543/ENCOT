@@ -23,7 +23,7 @@ def main():
     # Set working directory to parent directory so model paths work correctly
     os.chdir(parent_dir)
 
-    print("Starting ColiFormer GUI...")
+    print("Starting ENCOT GUI...")
     print(f"   Working directory: {parent_dir}")
     print(f"   Python path includes: {parent_dir}")
 
@@ -92,7 +92,7 @@ def main():
             "--server.address", "0.0.0.0"
         ])
     except KeyboardInterrupt:
-        print("\nShutting down ColiFormer GUI...")
+        print("\nShutting down ENCOT GUI...")
         return 0
     except Exception as e:
         print(f"Error launching Streamlit: {e}")

@@ -2,7 +2,7 @@
 File: pretrain.py
 -----------------
 Pretrain the base transformer model on JSON datasets prepared via
-CodonData.prepare_training_data. This is typically not needed for ColiFormer
+CodonData.prepare_training_data. This is typically not needed for ENCOT
 as we use the pretrained CodonTransformer base. See README for setup and usage.
 """
 

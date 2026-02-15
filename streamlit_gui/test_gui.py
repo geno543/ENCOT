@@ -267,7 +267,7 @@ def test_post_processing():
 
 def main():
     """Run all tests"""
-    print("ColiFormer GUI Test Suite")
+    print("ENCOT GUI Test Suite")
     print("=" * 50)
 
     tests = [
